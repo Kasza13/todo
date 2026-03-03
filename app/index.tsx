@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {
   FlatList,
-  StyleSheet,
+  Modal,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import "../global.css";
 
 type Task = {
   id: string;
@@ -19,6 +20,9 @@ export default function Index() {
   const [taskText, setTaskText] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const addTask = () => {
     if (taskText.trim() === "") return;
 
@@ -29,28 +33,37 @@ export default function Index() {
       important: false,
     };
 
-    setTasks([...tasks, newTask]);
+    setTasks((prev) => [...prev, newTask]);
     setTaskText("");
   };
 
   const toggleCompleted = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task,
       ),
     );
   };
 
   const toggleImportant = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === id ? { ...task, important: !task.important } : task,
       ),
     );
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const openDeleteModal = (id: string) => {
+    setSelectedId(id);
+    setModalVisible(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedId) {
+      setTasks((prev) => prev.filter((task) => task.id !== selectedId));
+    }
+    setModalVisible(false);
+    setSelectedId(null);
   };
 
   return (
@@ -89,17 +102,42 @@ export default function Index() {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => deleteTask(item.id)}>
-                <Text style={{ color: "red" }}>X</Text>
+              <TouchableOpacity onPress={() => openDeleteModal(item.id)}>
+                <Text style={styles.delete}>X</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
       />
+
+      <Modal transparent animationType="fade" visible={modalVisible}>
+        <View style={styles.overlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Delete task?</Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.confirmBtn}
+                onPress={confirmDelete}
+              >
+                <Text style={{ color: "white" }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
+/*
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -118,21 +156,21 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   addButton: {
     marginLeft: 10,
     backgroundColor: "black",
     paddingHorizontal: 15,
     justifyContent: "center",
-    borderRadius: 10,
+    borderRadius: 8,
   },
   taskRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 12,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     marginBottom: 10,
   },
   taskText: {
@@ -146,4 +184,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-});
+  delete: {
+    color: "red",
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    width: "75%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 12,
+  },
+  modalTitle: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  cancelBtn: {
+    marginRight: 15,
+  },
+  confirmBtn: {
+    backgroundColor: "black",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+});*/
+
+/* tailwind (kész), completed/done button elkészítése  , a lista legyen külön komponens. a delete kapjon alertet -> külön komponens (kész)*/
