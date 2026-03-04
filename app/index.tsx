@@ -8,12 +8,15 @@ import {
   View,
 } from "react-native";
 import "../global.css";
+import TaskDetails from "./components/TaskDetails";
 
 type Task = {
   id: string;
   text: string;
   completed: boolean;
   important: boolean;
+  description?: string;
+  deadline?: string;
 };
 
 export default function Index() {
@@ -119,7 +122,6 @@ export default function Index() {
                     onPress={() => setExpandedId(isExpanded ? null : item.id)}
                   >
                     <Text className="mr-2">{isExpanded ? "▲" : "▼"}</Text>
-
                     <Text
                       className={
                         item.completed ? "line-through text-gray-400" : ""
@@ -129,28 +131,43 @@ export default function Index() {
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
-                    <Text className="text-sm text-gray-500">
-                      {item.completed ? "Done" : "Active"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {isExpanded && (
-                  <View className="mt-2">
-                    <TouchableOpacity onPress={() => toggleImportant(item.id)}>
-                      <Text className="text-sm text-gray-600">
-                        {item.important ? "Unmark important" : "Mark important"}
+                  <View className="flex-row items-center">
+                    <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
+                      <Text className="text-sm text-gray-500">
+                        {item.completed ? "Done" : "Active"}
                       </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      className="mt-1"
+                      className="ml-4"
                       onPress={() => openDeleteModal(item.id)}
                     >
                       <Text className="text-sm text-red-500">Delete</Text>
                     </TouchableOpacity>
                   </View>
+                </View>
+
+                {isExpanded && (
+                  <TaskDetails
+                    important={item.important}
+                    onToggleImportant={() => toggleImportant(item.id)}
+                    description={item.description}
+                    onChangeDescription={(text) => {
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t.id === item.id ? { ...t, description: text } : t,
+                        ),
+                      );
+                    }}
+                    deadline={item.deadline}
+                    onChangeDeadline={(date) => {
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t.id === item.id ? { ...t, deadline: date } : t,
+                        ),
+                      );
+                    }}
+                  />
                 )}
               </View>
             </>
