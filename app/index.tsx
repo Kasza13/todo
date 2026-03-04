@@ -19,9 +19,9 @@ type Task = {
 export default function Index() {
   const [taskText, setTaskText] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const addTask = () => {
     if (taskText.trim() === "") return;
@@ -80,75 +80,78 @@ export default function Index() {
 
   return (
     <View className="flex-1 px-6 pt-16">
-      <View className="flex-row mb-5">
+      <View className="flex-row mb-4">
         <TextInput
-          className="flex-1 border border-gray-400 p-3 rounded-lg"
+          className="flex-1 border border-gray-300 p-2"
           placeholder="New task..."
           value={taskText}
           onChangeText={setTaskText}
         />
         <TouchableOpacity
-          className="ml-3 bg-black px-4 justify-center rounded-lg"
+          className="ml-2 px-3 justify-center border border-gray-300"
           onPress={addTask}
         >
-          <Text className="text-white font-semibold">Add</Text>
+          <Text>Add</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
         data={[...activeTasks, ...finishedTasks]}
         keyExtractor={(item) => item.id}
-        ListFooterComponent={null}
         renderItem={({ item, index }) => {
           const isFirstFinished =
             finishedTasks.length > 0 && index === activeTasks.length;
 
+          const isExpanded = expandedId === item.id;
+
           return (
             <>
               {isFirstFinished && (
-                <View className="my-6 bg-green-200 rounded-lg p-4 items-center">
-                  <Text className="font-semibold">Finished</Text>
+                <View className="my-4">
+                  <Text className="text-gray-500">Finished</Text>
                 </View>
               )}
 
-              <View
-                className={`flex-row justify-between items-center p-3 border border-gray-300 rounded-lg mb-3 ${
-                  item.completed ? "opacity-60" : ""
-                }`}
-              >
-                <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
-                  <Text
-                    className={`text-lg ${
-                      item.completed ? "line-through text-gray-400" : ""
-                    }`}
-                  >
-                    {item.text}
-                  </Text>
-                </TouchableOpacity>
-
-                <View className="flex-row items-center">
+              <View className="border-b border-gray-200 py-3">
+                <View className="flex-row justify-between items-center">
                   <TouchableOpacity
-                    className="mr-4"
-                    onPress={() => toggleImportant(item.id)}
+                    className="flex-row items-center"
+                    onPress={() => setExpandedId(isExpanded ? null : item.id)}
                   >
-                    <Text className="text-xl">
-                      {item.important ? "⭐" : "☆"}
+                    <Text className="mr-2">{isExpanded ? "▲" : "▼"}</Text>
+
+                    <Text
+                      className={
+                        item.completed ? "line-through text-gray-400" : ""
+                      }
+                    >
+                      {item.text}
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    className="mr-4"
-                    onPress={() => toggleCompleted(item.id)}
-                  >
-                    <Text className="text-sm">
-                      {item.completed ? "Finished ✓" : "Work in progress..."}
+                  <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
+                    <Text className="text-sm text-gray-500">
+                      {item.completed ? "Done" : "Active"}
                     </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => openDeleteModal(item.id)}>
-                    <Text className="text-red-500 font-bold">X</Text>
                   </TouchableOpacity>
                 </View>
+
+                {isExpanded && (
+                  <View className="mt-2">
+                    <TouchableOpacity onPress={() => toggleImportant(item.id)}>
+                      <Text className="text-sm text-gray-600">
+                        {item.important ? "Unmark important" : "Mark important"}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      className="mt-1"
+                      onPress={() => openDeleteModal(item.id)}
+                    >
+                      <Text className="text-sm text-red-500">Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             </>
           );
@@ -156,9 +159,9 @@ export default function Index() {
       />
 
       <Modal transparent animationType="fade" visible={modalVisible}>
-        <View className="flex-1 bg-black/30 justify-center items-center">
-          <View className="w-3/4 bg-white p-6 rounded-xl">
-            <Text className="text-base mb-5 font-semibold">Delete task?</Text>
+        <View className="flex-1 bg-black/20 justify-center items-center">
+          <View className="w-3/4 bg-white p-4">
+            <Text className="mb-4">Delete task?</Text>
 
             <View className="flex-row justify-end">
               <TouchableOpacity
@@ -168,11 +171,8 @@ export default function Index() {
                 <Text>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                className="bg-black px-4 py-2 rounded-md"
-                onPress={confirmDelete}
-              >
-                <Text className="text-white">Delete</Text>
+              <TouchableOpacity onPress={confirmDelete}>
+                <Text className="text-red-500">Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
