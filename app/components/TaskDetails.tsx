@@ -1,5 +1,12 @@
-import { useState } from "react";
+import { FC, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SubtaskList } from "./SubtaskList";
+
+type Subtask = {
+  id: string;
+  text: string;
+  completed: boolean;
+};
 
 type Props = {
   priority: "low" | "medium" | "high";
@@ -8,16 +15,20 @@ type Props = {
   onChangeDescription?: (text: string) => void;
   deadline?: string;
   onChangeDeadline?: (date: string) => void;
+  subtasks?: Subtask[];
+  onChangeSubtasks?: (updated: Subtask[]) => void;
 };
 
-export default function TaskDetails({
+export const TaskDetails: FC<Props> = ({
   priority,
   onChangePriority,
   description = "",
   onChangeDescription,
   deadline = "",
   onChangeDeadline,
-}: Props) {
+  subtasks = [],
+  onChangeSubtasks = () => {},
+}) => {
   const [desc, setDesc] = useState(description);
   const [date, setDate] = useState(deadline);
 
@@ -63,6 +74,8 @@ export default function TaskDetails({
           </TouchableOpacity>
         ))}
       </View>
+
+      <SubtaskList subtasks={subtasks} onChangeSubtasks={onChangeSubtasks} />
     </View>
   );
-}
+};
