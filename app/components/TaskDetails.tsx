@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  important: boolean;
-  onToggleImportant: () => void;
+  priority: "low" | "medium" | "high";
+  onChangePriority: (level: "low" | "medium" | "high") => void;
   description?: string;
   onChangeDescription?: (text: string) => void;
   deadline?: string;
@@ -11,8 +11,8 @@ type Props = {
 };
 
 export default function TaskDetails({
-  important,
-  onToggleImportant,
+  priority,
+  onChangePriority,
   description = "",
   onChangeDescription,
   deadline = "",
@@ -22,26 +22,9 @@ export default function TaskDetails({
   const [date, setDate] = useState(deadline);
 
   return (
-    <View style={{ marginTop: 8 }}>
-      {/* Important */}
-      <TouchableOpacity
-        onPress={onToggleImportant}
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
-      >
-        <Text style={{ fontSize: 14, color: "#555", marginRight: 6 }}>
-          {important ? "★" : "☆"} Mark Important
-        </Text>
-      </TouchableOpacity>
-
-      {/* Description */}
+    <View className="mt-2 space-y-2">
       <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          padding: 4,
-          fontSize: 14,
-          marginBottom: 6,
-        }}
+        className="border border-gray-300 p-2 text-sm rounded"
         placeholder="Description..."
         value={desc}
         onChangeText={(text) => {
@@ -51,14 +34,8 @@ export default function TaskDetails({
         multiline
       />
 
-      {/* Deadline */}
       <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          padding: 4,
-          fontSize: 14,
-        }}
+        className="border border-gray-300 p-2 text-sm rounded"
         placeholder="Deadline (YYYY-MM-DD)"
         value={date}
         onChangeText={(text) => {
@@ -66,6 +43,26 @@ export default function TaskDetails({
           onChangeDeadline?.(text);
         }}
       />
+
+      <View className="flex-row space-x-2 mt-2">
+        {(["low", "medium", "high"] as const).map((level) => (
+          <TouchableOpacity
+            key={level}
+            onPress={() => onChangePriority(level)}
+            className={`px-2 py-1 border rounded ${
+              priority === level
+                ? level === "high"
+                  ? "bg-red-500 text-white"
+                  : level === "medium"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-green-400 text-black"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            <Text className="text-sm font-mono">{level.toUpperCase()}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }

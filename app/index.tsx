@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   FlatList,
   Modal,
@@ -14,7 +14,7 @@ type Task = {
   id: string;
   text: string;
   completed: boolean;
-  important: boolean;
+  priority: "low" | "medium" | "high";
   description?: string;
   deadline?: string;
 };
@@ -33,7 +33,7 @@ export default function Index() {
       id: Date.now().toString(),
       text: taskText,
       completed: false,
-      important: false,
+      priority: "low",
     };
 
     setTasks((prev) => [...prev, newTask]);
@@ -45,16 +45,6 @@ export default function Index() {
       prev.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task,
       ),
-    );
-  };
-
-  const toggleImportant = (id: string) => {
-    setTasks((prev) =>
-      [...prev]
-        .map((task) =>
-          task.id === id ? { ...task, important: !task.important } : task,
-        )
-        .sort((a, b) => Number(b.important) - Number(a.important)),
     );
   };
 
@@ -71,15 +61,18 @@ export default function Index() {
     setSelectedId(null);
   };
 
-  const activeTasks = useMemo(
-    () => tasks.filter((task) => !task.completed),
-    [tasks],
-  );
+  const activeTasks = tasks.filter((task) => !task.completed);
+  const finishedTasks = tasks.filter((task) => task.completed);
 
-  const finishedTasks = useMemo(
-    () => tasks.filter((task) => task.completed),
-    [tasks],
-  );
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    if (priorityOrder[b.priority] - priorityOrder[a.priority] !== 0) {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+    return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+  });
 
   return (
     <View className="flex-1 px-6 pt-16">
@@ -99,11 +92,12 @@ export default function Index() {
       </View>
 
       <FlatList
-        data={[...activeTasks, ...finishedTasks]}
+        data={sortedTasks}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => {
           const isFirstFinished =
-            finishedTasks.length > 0 && index === activeTasks.length;
+            finishedTasks.length > 0 &&
+            index === sortedTasks.findIndex((t) => t.completed);
 
           const isExpanded = expandedId === item.id;
 
@@ -111,7 +105,7 @@ export default function Index() {
             <>
               {isFirstFinished && (
                 <View className="my-4">
-                  <Text className="text-gray-500">Finished</Text>
+                  <Text className="text-gray-500 font-mono">Finished</Text>
                 </View>
               )}
 
@@ -123,25 +117,26 @@ export default function Index() {
                   >
                     <Text className="mr-2">{isExpanded ? "▲" : "▼"}</Text>
                     <Text
-                      className={
-                        item.completed ? "line-through text-gray-400" : ""
-                      }
+                      className={`font-mono ${
+                        item.priority === "high"
+                          ? "text-red-500"
+                          : item.priority === "medium"
+                            ? "text-yellow-500"
+                            : "text-gray-400"
+                      }`}
                     >
-                      {item.text}
+                      {item.text} {item.priority === "high" ? "★" : ""}
                     </Text>
                   </TouchableOpacity>
 
-                  <View className="flex-row items-center">
+                  <View className="flex-row items-center space-x-4">
                     <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
                       <Text className="text-sm text-gray-500">
                         {item.completed ? "Done" : "Active"}
                       </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                      className="ml-4"
-                      onPress={() => openDeleteModal(item.id)}
-                    >
+                    <TouchableOpacity onPress={() => openDeleteModal(item.id)}>
                       <Text className="text-sm text-red-500">Delete</Text>
                     </TouchableOpacity>
                   </View>
@@ -149,24 +144,30 @@ export default function Index() {
 
                 {isExpanded && (
                   <TaskDetails
-                    important={item.important}
-                    onToggleImportant={() => toggleImportant(item.id)}
+                    priority={item.priority}
+                    onChangePriority={(level) =>
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t.id === item.id ? { ...t, priority: level } : t,
+                        ),
+                      )
+                    }
                     description={item.description}
-                    onChangeDescription={(text) => {
+                    onChangeDescription={(text) =>
                       setTasks((prev) =>
                         prev.map((t) =>
                           t.id === item.id ? { ...t, description: text } : t,
                         ),
-                      );
-                    }}
+                      )
+                    }
                     deadline={item.deadline}
-                    onChangeDeadline={(date) => {
+                    onChangeDeadline={(date) =>
                       setTasks((prev) =>
                         prev.map((t) =>
                           t.id === item.id ? { ...t, deadline: date } : t,
                         ),
-                      );
-                    }}
+                      )
+                    }
                   />
                 )}
               </View>
@@ -180,11 +181,8 @@ export default function Index() {
           <View className="w-3/4 bg-white p-4">
             <Text className="mb-4">Delete task?</Text>
 
-            <View className="flex-row justify-end">
-              <TouchableOpacity
-                className="mr-4"
-                onPress={() => setModalVisible(false)}
-              >
+            <View className="flex-row justify-end space-x-4">
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text>Cancel</Text>
               </TouchableOpacity>
 
