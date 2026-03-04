@@ -181,4 +181,3 @@ export default function Index() {
     </View>
   );
 }
-/* tailwind , completed/done button elkészítése , a lista legyen külön komponens. a delete kapjon alertet -> külön komponens*/
