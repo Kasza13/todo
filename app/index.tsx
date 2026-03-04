@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   FlatList,
   Modal,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import "../global.css";
 
@@ -47,9 +47,11 @@ export default function Index() {
 
   const toggleImportant = (id: string) => {
     setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id ? { ...task, important: !task.important } : task,
-      ),
+      [...prev]
+        .map((task) =>
+          task.id === id ? { ...task, important: !task.important } : task,
+        )
+        .sort((a, b) => Number(b.important) - Number(a.important)),
     );
   };
 
@@ -66,68 +68,111 @@ export default function Index() {
     setSelectedId(null);
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Todo</Text>
+  const activeTasks = useMemo(
+    () => tasks.filter((task) => !task.completed),
+    [tasks],
+  );
 
-      <View style={styles.inputRow}>
+  const finishedTasks = useMemo(
+    () => tasks.filter((task) => task.completed),
+    [tasks],
+  );
+
+  return (
+    <View className="flex-1 px-6 pt-16">
+      <View className="flex-row mb-5">
         <TextInput
-          style={styles.input}
+          className="flex-1 border border-gray-400 p-3 rounded-lg"
           placeholder="New task..."
           value={taskText}
           onChangeText={setTaskText}
         />
-        <TouchableOpacity style={styles.addButton} onPress={addTask}>
-          <Text style={{ color: "white" }}>Add</Text>
+        <TouchableOpacity
+          className="ml-3 bg-black px-4 justify-center rounded-lg"
+          onPress={addTask}
+        >
+          <Text className="text-white font-semibold">Add</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={tasks}
+        data={[...activeTasks, ...finishedTasks]}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.taskRow}>
-            <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
-              <Text
-                style={[styles.taskText, item.completed && styles.completed]}
+        ListFooterComponent={null}
+        renderItem={({ item, index }) => {
+          const isFirstFinished =
+            finishedTasks.length > 0 && index === activeTasks.length;
+
+          return (
+            <>
+              {isFirstFinished && (
+                <View className="my-6 bg-green-200 rounded-lg p-4 items-center">
+                  <Text className="font-semibold">Finished</Text>
+                </View>
+              )}
+
+              <View
+                className={`flex-row justify-between items-center p-3 border border-gray-300 rounded-lg mb-3 ${
+                  item.completed ? "opacity-60" : ""
+                }`}
               >
-                {item.text}
-              </Text>
-            </TouchableOpacity>
+                <TouchableOpacity onPress={() => toggleCompleted(item.id)}>
+                  <Text
+                    className={`text-lg ${
+                      item.completed ? "line-through text-gray-400" : ""
+                    }`}
+                  >
+                    {item.text}
+                  </Text>
+                </TouchableOpacity>
 
-            <View style={styles.actions}>
-              <TouchableOpacity onPress={() => toggleImportant(item.id)}>
-                <Text style={{ marginRight: 15 }}>
-                  {item.important ? "⭐" : "☆"}
-                </Text>
-              </TouchableOpacity>
+                <View className="flex-row items-center">
+                  <TouchableOpacity
+                    className="mr-4"
+                    onPress={() => toggleImportant(item.id)}
+                  >
+                    <Text className="text-xl">
+                      {item.important ? "⭐" : "☆"}
+                    </Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => openDeleteModal(item.id)}>
-                <Text style={styles.delete}>X</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+                  <TouchableOpacity
+                    className="mr-4"
+                    onPress={() => toggleCompleted(item.id)}
+                  >
+                    <Text className="text-sm">
+                      {item.completed ? "Finished ✓" : "Work in progress..."}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => openDeleteModal(item.id)}>
+                    <Text className="text-red-500 font-bold">X</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          );
+        }}
       />
 
       <Modal transparent animationType="fade" visible={modalVisible}>
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Delete task?</Text>
+        <View className="flex-1 bg-black/30 justify-center items-center">
+          <View className="w-3/4 bg-white p-6 rounded-xl">
+            <Text className="text-base mb-5 font-semibold">Delete task?</Text>
 
-            <View style={styles.modalActions}>
+            <View className="flex-row justify-end">
               <TouchableOpacity
-                style={styles.cancelBtn}
+                className="mr-4"
                 onPress={() => setModalVisible(false)}
               >
                 <Text>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.confirmBtn}
+                className="bg-black px-4 py-2 rounded-md"
                 onPress={confirmDelete}
               >
-                <Text style={{ color: "white" }}>Delete</Text>
+                <Text className="text-white">Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -136,87 +181,4 @@ export default function Index() {
     </View>
   );
 }
-
-/*
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    marginTop: 60,
-  },
-  title: {
-    fontSize: 28,
-    marginBottom: 20,
-  },
-  inputRow: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 8,
-  },
-  addButton: {
-    marginLeft: 10,
-    backgroundColor: "black",
-    paddingHorizontal: 15,
-    justifyContent: "center",
-    borderRadius: 8,
-  },
-  taskRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  taskText: {
-    fontSize: 16,
-  },
-  completed: {
-    textDecorationLine: "line-through",
-    opacity: 0.5,
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  delete: {
-    color: "red",
-  },
-
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modal: {
-    width: "75%",
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 12,
-  },
-  modalTitle: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  cancelBtn: {
-    marginRight: 15,
-  },
-  confirmBtn: {
-    backgroundColor: "black",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-});*/
-
-/* tailwind (kész), completed/done button elkészítése  , a lista legyen külön komponens. a delete kapjon alertet -> külön komponens (kész)*/
+/* tailwind , completed/done button elkészítése , a lista legyen külön komponens. a delete kapjon alertet -> külön komponens*/
