@@ -2,7 +2,6 @@
 // useState -> komponens állapot tárolása
 // useEffect -> mellékhatások kezelése (pl. szűrés minden változásnál)
 import React, { useEffect, useState } from "react";
-
 // React Native UI elemek
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -47,8 +46,8 @@ export const SearchBar: React.FC<Props> = ({ tasks, onFilter }) => {
       // ha "all" -> minden megfelel
       const categoryMatch =
         categoryFilter === "all" ||
-        (task.taskType || "").toLowerCase() === categoryFilter;
-
+        (typeof task.taskType === "string" &&
+          task.taskType.toLowerCase() === categoryFilter);
       // Prioritás ellenőrzése
       const priorityMatch =
         priorityFilter === "all" || task.priority === priorityFilter;
@@ -148,3 +147,4 @@ export const SearchBar: React.FC<Props> = ({ tasks, onFilter }) => {
     </View>
   );
 };
+

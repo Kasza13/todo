@@ -24,8 +24,10 @@ export type Task = {
   text: string; // a feladat szövege
   completed: boolean; // elkészült-e
   priority: Priority; // prioritás
-  description?: string; // opcionális leírás
-  deadline?: string; // opcionális határidő
+  description?: string; // optional description
+  deadline?: string; // optional deadline
+  taskType?: string; // optional category
+  subtasks?: { id: string; text: string; completed: boolean }[]; // optional subtasks
 };
 
 // Prioritás enum
@@ -220,3 +222,5 @@ export default function Index() {
     </View>
   );
 }
+
+
