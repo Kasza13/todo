@@ -1,31 +1,34 @@
+// FC (Function Component) típus importálása Reactből
 import { FC } from "react";
+// React Native UI komponensek importálása
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// A komponens által kapott propsok típusa
+// Props típusdefiníció a TaskInput komponenshez
 type Props = {
-  taskText: string; // Az input mező aktuális szövege
-  setTaskText: (text: string) => void; // Függvény az input szöveg frissítésére
-  addTask: () => void; // Függvény új task hozzáadására
+  taskText: string; // A beviteli mező értéke
+  setTaskText: (text: string) => void; // Callback a szöveg frissítésére
+  addTask: () => void; // Callback új task hozzáadására
 };
 
-// TaskInput komponens
+// TaskInput funkcionális komponens definiálása
 export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
-  // Konténer: egy sorban jelenik meg az input és a gomb
-  <View className="flex-row mb-4">
-    {/* Szövegbeviteli mező új taskhoz */}
+  // Fő wrapper: sorba rendezett elemek (input és gomb)
+  <View className="flex-row items-center mb-4">
+    {/* Input mező */}
     <TextInput
-      className="flex-1 border border-gray-300 p-2" // kitölti a rendelkezésre álló helyet
-      placeholder="New task..." // placeholder szöveg
-      value={taskText} // az aktuális input érték
-      onChangeText={setTaskText} // amikor a user gépel → frissíti az állapotot
+      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800" // Stílus
+      placeholder="New task..." // Helykitöltő szöveg
+      placeholderTextColor="#9ca3af" // Szürke helykitöltő szín
+      value={taskText} // Input értéke a state-ből
+      onChangeText={setTaskText} // Input változásakor frissítjük a state-et
     />
 
-    {/* Task hozzáadó gomb */}
+    {/* Add gomb */}
     <TouchableOpacity
-      className="ml-2 px-3 justify-center border border-gray-300"
-      onPress={addTask} // gomb megnyomásakor új task jön létre
+      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl" // Stílus: kék háttér, lekerekített sarkok
+      onPress={addTask} // Gombnyomáskor új task hozzáadása
     >
-      <Text>Add</Text>
+      <Text className="text-white font-medium">Add</Text> {/* Gomb szöveg */}
     </TouchableOpacity>
   </View>
 );

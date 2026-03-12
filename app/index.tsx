@@ -1,45 +1,36 @@
-// React hookok importálása
-// useState -> állapot tárolása komponensen belül
-// useMemo -> számítás cache-elése, hogy ne fusson újra minden rendernél
+// React és React Native hook-ok importálása
 import { useMemo, useState } from "react";
-
-// React Native komponensek
-// FlatList -> nagy listák hatékony megjelenítésére
-// View -> alap konténer komponens
 import { FlatList, View } from "react-native";
 
-// Globális stílus (pl. NativeWind / Tailwind)
+// Globális stílusok importálása
 import "../global.css";
 
-// Saját komponensek importálása
-import { DeleteModal } from "./components/DeleteModal"; // törlés megerősítő modal
-import { SearchBar } from "./components/SearchBar"; // kereső mező
-import { TaskInput } from "./components/TaskInput"; // új task hozzáadása
-import { TaskItem } from "./components/TaskItem"; // egy task megjelenítése
+// Komponensek importálása
+import { DeleteModal } from "./components/DeleteModal";
+import { SearchBar } from "./components/SearchBar";
+import { TaskInput } from "./components/TaskInput";
+import { TaskItem } from "./components/TaskItem";
 
-// Task típus definiálása TypeScriptben
-// Ez határozza meg, hogy egy feladat objektum milyen mezőket tartalmaz
+// Task típus definiálása
 export type Task = {
-  id: string; // egyedi azonosító
-  text: string; // a feladat szövege
-  completed: boolean; // elkészült-e
-  priority: Priority; // prioritás
-  description?: string; // optional description
-  deadline?: string; // optional deadline
-  taskType?: string; // optional category
-  subtasks?: { id: string; text: string; completed: boolean }[]; // optional subtasks
+  id: string; // Egyedi azonosító
+  text: string; // Feladat szövege
+  completed: boolean; // Kész státusz
+  priority: Priority; // Prioritás szint
+  description?: string; // Opcionális leírás
+  deadline?: string; // Opcionális határidő
+  taskType?: string; // Opcionális típus
+  subtasks?: { id: string; text: string; completed: boolean }[]; // Opcionális alfeladatok
 };
 
 // Prioritás enum
-// Segít fix értékek használatában stringek helyett
 export enum Priority {
   Low = "low",
   Medium = "medium",
   High = "high",
 }
 
-// Prioritási sorrend meghatározása
-// Ez segít a rendezésnél
+// Prioritás súlyozás a rendezéshez
 const priorityOrder = {
   high: 3,
   medium: 2,
@@ -47,180 +38,132 @@ const priorityOrder = {
 };
 
 // Task rendező függvény
-// Ezt fogjuk használni mindenhol a lista rendezésére
 const sortTasks = (a: Task, b: Task) => {
-  // Először prioritás szerint rendezünk
-  // Magas prioritás kerül előre
+  // Először prioritás alapján
   if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   }
 
-  // Ha az egyik tasknak nincs határideje
-  // akkor az hátrébb kerül
+  // Ha nincs határidő
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
 
-  // Ha mindkettőnek van határideje
-  // akkor dátum szerint rendezzük
+  // Határidő szerint növekvő sorrend
   return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
 };
 
 // Fő komponens
 export default function Index() {
-  // Az input mező aktuális szövege
-  const [taskText, setTaskText] = useState("");
-
-  // A teljes task lista
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  // Keresés után megjelenített taskok
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-
-  // Törlés megerősítő modal állapota
-  const [modalVisible, setModalVisible] = useState(false);
-
-  // A törlésre kiválasztott task ID
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // Melyik task van éppen kibontva
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // Lokális állapotok
+  const [taskText, setTaskText] = useState(""); // Input mező
+  const [tasks, setTasks] = useState<Task[]>([]); // Összes task
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Szűrt taskok
+  const [modalVisible, setModalVisible] = useState(false); // Delete modal láthatósága
+  const [selectedId, setSelectedId] = useState<string | null>(null); // Törlendő task ID
+  const [expandedId, setExpandedId] = useState<string | null>(null); // Kibővített task ID
 
   // Új task hozzáadása
   const addTask = () => {
-    // Ha az input üres vagy csak szóköz
-    // akkor nem adunk hozzá taskot
-    if (taskText.trim() === "") return;
+    if (taskText.trim() === "") return; // Üres szöveg nem engedélyezett
 
-    // Új task objektum létrehozása
     const newTask: Task = {
-      id: Date.now().toString(), // timestamp alapú ID
-      text: taskText, // feladat szövege
-      completed: false, // alapból nincs kész
-      priority: Priority.Low, // alap prioritás
+      id: Date.now().toString(), // Egyedi ID
+      text: taskText,
+      completed: false,
+      priority: Priority.Low, // Alapértelmezett prioritás
     };
 
-    // Task hozzáadása a listához
-    setTasks((prev) => [...prev, newTask]);
-
-    // Input mező törlése
-    setTaskText("");
+    setTasks((prev) => [...prev, newTask]); // Task hozzáadása
+    setTaskText(""); // Input törlése
   };
 
-  // Task completed állapotának váltása
+  // Completed státusz váltása
   const toggleCompleted = (id: string) => {
     setTasks((prev) =>
       prev.map((task) =>
-        // Ha az ID egyezik
-        // akkor megfordítjuk a completed értéket
         task.id === id ? { ...task, completed: !task.completed } : task,
       ),
     );
   };
 
-  // Törlés modal megnyitása
+  // Delete modal megnyitása
   const openDeleteModal = (id: string) => {
-    // Kiválasztott task mentése
     setSelectedId(id);
-
-    // Modal megjelenítése
     setModalVisible(true);
   };
 
-  // Task törlés megerősítése
+  // Delete megerősítés
   const confirmDelete = () => {
     if (selectedId) {
-      // A kiválasztott task eltávolítása
       setTasks((prev) => prev.filter((task) => task.id !== selectedId));
     }
 
-    // Modal bezárása
     setModalVisible(false);
-
-    // Kiválasztás törlése
     setSelectedId(null);
   };
 
-  // Task adatainak frissítése
+  // Task frissítése
   const onChangeTask = (id: string, updatedTask: Partial<Task>) => {
-    // Partial<Task> azt jelenti
-    // hogy nem kell minden mezőt átadni
-
     setTasks((prev) =>
       prev.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)),
     );
   };
 
-  // Befejezett taskok kiszűrése
-  // useMemo azért kell
-  // hogy csak akkor számolódjon újra
-  // ha a tasks lista változik
+  // Befejezett taskok
   const finishedTasks = useMemo(
     () => tasks.filter((t) => t.completed),
     [tasks],
   );
 
-  // Megjelenítendő taskok listája
-  // Ha van keresési eredmény -> filteredTasks
-  // különben -> tasks
+  // Megjelenítendő taskok: szűrt vagy összes, rendezve
   const displayedTasks = useMemo(() => {
     const source = filteredTasks.length > 0 ? filteredTasks : tasks;
-
-    // Másolat készítése és rendezése
     return [...source].sort(sortTasks);
   }, [tasks, filteredTasks]);
 
-  // JSX render
   return (
-    // Fő konténer
-    <View className="flex-1 px-6 pt-16">
-      {/* Kereső sáv */}
+    <View className="flex-1 bg-gray-100 px-5 pt-16">
+      {/* Search bar komponens */}
       <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
 
-      {/* Task hozzáadó mező */}
+      {/* Task input komponens */}
       <TaskInput
         taskText={taskText}
         setTaskText={setTaskText}
         addTask={addTask}
       />
 
-      {/* Task lista megjelenítése */}
+      {/* Task lista */}
       <FlatList
-        // A lista adatai
-        data={displayedTasks}
-        // Kulcs generálása minden elemhez
-        keyExtractor={(item) => item.id}
-        // Egy lista elem renderelése
-        renderItem={({ item, index }) => (
-          <TaskItem
-            task={item}
-            // Kibontott task ellenőrzése
-            isExpanded={expandedId === item.id}
-            // Expand / collapse kezelése
-            onToggleExpand={(id) =>
-              setExpandedId(expandedId === id ? null : id)
-            }
-            // Completed állapot váltása
-            toggleCompleted={toggleCompleted}
-            // Törlés modal megnyitása
-            openDeleteModal={openDeleteModal}
-            // Task frissítése
-            onChangeTask={onChangeTask}
-            // Befejezett label megjelenítése
-            showFinishedLabel={
-              finishedTasks.findIndex((t) => t.id === item.id) === 0
-            }
-          />
+        data={displayedTasks} // Megjelenítendő taskok
+        keyExtractor={(item) => item.id} // Egyedi kulcs
+        contentContainerStyle={{ paddingBottom: 120 }} // Alul padding
+        ItemSeparatorComponent={() => <View className="h-3" />} // Elem közötti távolság
+        renderItem={({ item }) => (
+          <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+            <TaskItem
+              task={item} // Task adatai
+              isExpanded={expandedId === item.id} // Kibővítés állapota
+              onToggleExpand={(id) =>
+                setExpandedId(expandedId === id ? null : id)
+              } // Kibővítés váltása
+              toggleCompleted={toggleCompleted} // Completed státusz váltása
+              openDeleteModal={openDeleteModal} // Delete modal megnyitása
+              onChangeTask={onChangeTask} // Task frissítése
+              showFinishedLabel={
+                finishedTasks.findIndex((t) => t.id === item.id) === 0
+              } // "Finished" label az első kész tasknál
+            />
+          </View>
         )}
       />
 
-      {/* Törlés megerősítő modal */}
+      {/* Delete modal */}
       <DeleteModal
-        visible={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        onConfirm={confirmDelete}
+        visible={modalVisible} // Láthatóság
+        onCancel={() => setModalVisible(false)} // Cancel callback
+        onConfirm={confirmDelete} // Confirm callback
       />
     </View>
   );
 }
-
-

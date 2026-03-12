@@ -1,73 +1,61 @@
 // React és React Native importok
-import React, { useEffect, useState } from "react"; // useState: state kezeléshez, useEffect: oldalhatásokhoz
-import { FlatList, StyleSheet, Text, View } from "react-native"; // alap komponensek és stílus kezelés
+import React, { useEffect, useState } from "react";
+// FlatList komponens a lista megjelenítésére, Text és View UI komponensek
+import { FlatList, Text, View } from "react-native";
 
-// TypeScript interfész a Post típushoz
+// TypeScript interfész a Post típus definiálásához
 interface Post {
-  id: number; // egyedi azonosító
-  title: string; // post címe
-  body: string; // post tartalma
+  id: number; // Egyedi azonosító
+  title: string; // Poszt címe
+  body: string; // Poszt tartalma
 }
 
-// Alapértelmezett exportált komponens
+// Alapértelmezett exportált funkcionális komponens
 export default function App() {
-  // posts state létrehozása, kezdetben üres tömb
+  // Állapot a betöltött posztok tárolására, alapértelmezett üres tömb
   const [posts, setPosts] = useState<Post[]>([]);
-  /*
-  // useEffect fut az első render után (componentDidMount) //lehet e máshogy irni és miért van két .then ág ?
-  useEffect(() => {
-    // Fetch kérés a JSONPlaceholder API-ra
-    fetch("https://jsonplaceholder.typicode.com/posts")
-      .then((res) => res.json()) // a választ JSON formátumba alakítjuk
-      .then((data: Post[]) => setPosts(data)) // a kapott tömböt elmentjük a state-be (data = az API-ból jövő posts tömb setPosts(data) = elmented React state-be )
-      .catch((err) => console.error(err)); // ha hiba történik, kiírjuk a konzolra
-  }, []); // üres dependency array → csak egyszer fut le a komponens életciklusa alatt
-  */
 
+  // useEffect a posztok betöltésére a komponens mountolásakor
   useEffect(() => {
+    // Aszinkron függvény a posztok betöltésére
     const loadPosts = async () => {
       try {
+        // HTTP GET kérés a JSONPlaceholder API-hoz
         const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+        // Válasz JSON konvertálása Post típusú tömbbé
         const data: Post[] = await res.json();
+        // Állapot frissítése a betöltött posztokkal
         setPosts(data);
       } catch (err) {
+        // Hibakezelés: hiba kiírása a konzolra
         console.error(err);
       }
     };
 
+    // Függvény meghívása
     loadPosts();
-  }, []);
+  }, []); // Üres dependency tömb = csak egyszer fut le, komponens mountkor
 
-  // A komponens renderelése
+  // JSX visszaadása
   return (
-    <View style={styles.container}>
-      {" "}
-      {/* Külső konténer */}
+    // Fő wrapper View, flex 1, padding 5, fehér háttér
+    <View className="flex-1 p-5 bg-white">
+      {/* FlatList a posztok listázásához */}
       <FlatList
-        data={posts} // a megjelenítendő adatok tömbje
-        keyExtractor={(item) => item.id.toString()} // egyedi kulcs minden elemhez
+        data={posts} // Lista adatok
+        keyExtractor={(item) => item.id.toString()} // Egyedi kulcs minden elemhez
+        ItemSeparatorComponent={() => <View className="h-4" />} // Elem közötti távolság
         renderItem={(
-          { item }, // minden elem renderelése
+          { item }, // Listaelem renderelése
         ) => (
-          <View style={styles.post}>
-            <Text style={styles.title}>{item.title}</Text> {/* Post címe */}
-            <Text>{item.body}</Text> {/* Post tartalma */}
+          <View className="p-4 border border-gray-300 rounded-lg bg-gray-50">
+            {/* Poszt címe */}
+            <Text className="font-bold mb-1 text-base">{item.title}</Text>
+            {/* Poszt tartalma */}
+            <Text className="text-gray-700">{item.body}</Text>
           </View>
         )}
       />
     </View>
   );
 }
-
-// Stílusok definiálása StyleSheet segítségével
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  post: {
-    marginBottom: 15,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-  title: { fontWeight: "bold", marginBottom: 5 },
-});
