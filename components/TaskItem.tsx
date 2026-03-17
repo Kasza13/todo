@@ -5,7 +5,7 @@ import { FC } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 // Priority enum importálása a projekt indexéből
-import { Priority } from "../index";
+import { Priority } from "@/types/Priority";
 
 // TaskDetails komponens és TaskType importálása
 import { TaskDetails, TaskType } from "./TaskDetails";

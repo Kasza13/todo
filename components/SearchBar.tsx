@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 // Importáljuk a Priority és Task típusokat a projekt index fájljából
-import { Priority, Task } from "../index";
+import { Priority } from "@/types/Priority";
+import { Task } from "./app/index";
 
 // Props típusdefiníció a SearchBar komponenshez
 type Props = {
@@ -155,18 +156,16 @@ export const SearchBar: React.FC<Props> = ({
           <TouchableOpacity
             className={`px-4 py-2 rounded-xl border self-start ${
               deadlineOnly
-                ? "bg-purple-500 border-purple-500" // Aktív állapot
-                : "bg-white border-gray-300" // Inaktív állapot
+                ? "bg-purple-500 border-purple-500"
+                : "bg-white border-gray-300"
             }`}
-            onPress={() => setDeadlineOnly(!deadlineOnly)} // Állapot váltása
+            onPress={() => setDeadlineOnly(!deadlineOnly)}
           >
             <Text
-              className={`text-sm ${
-                deadlineOnly ? "text-white" : "text-gray-700"
-              }`}
+              className={`text-sm ${deadlineOnly ? "text-white" : "text-gray-700"}`}
             >
               {deadlineOnly ? "Deadline only" : "All tasks"}{" "}
-              {/* Szöveg állapottól függ */}
+              {/* a {" "} eltávolítva */}
             </Text>
           </TouchableOpacity>
         </>

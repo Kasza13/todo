@@ -49,3 +49,4 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
     </View>
   </Modal>
 );
+export default DeleteModal;

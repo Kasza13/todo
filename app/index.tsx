@@ -6,10 +6,10 @@ import { FlatList, View } from "react-native";
 import "../global.css";
 
 // Komponensek importálása
-import { DeleteModal } from "./components/DeleteModal";
-import { SearchBar } from "./components/SearchBar";
-import { TaskInput } from "./components/TaskInput";
-import { TaskItem } from "./components/TaskItem";
+import { DeleteModal } from "../components/DeleteModal";
+import { SearchBar } from "../components/SearchBar";
+import { TaskInput } from "../components/TaskInput";
+import { TaskItem } from "../components/TaskItem";
 
 // Task típus definiálása
 export type Task = {
