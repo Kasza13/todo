@@ -1,113 +1,107 @@
-// FC (Function Component) típust importáljuk Reactből
 import { FC, useState } from "react";
-// React Native UI komponensek importálása
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
-// SubtaskList komponens importálása az alfeladatok kezeléséhez
 import { SubtaskList } from "./SubtaskList";
 
-// TaskType típus definiálása: előre definiált vagy bármilyen string
 export type TaskType = "home" | "work" | "other" | string;
 
-// Subtask típus definiálása
 type Subtask = {
-  id: string; // Egyedi azonosító
-  text: string; // Alfeladat szövege
-  completed: boolean; // Kész státusz
+  id: string;
+  text: string;
+  completed: boolean;
 };
 
-// Props típusdefiníció a TaskDetails komponenshez
 type Props = {
-  priority?: string; // Feladat prioritása
-  onChangePriority?: (priority: string) => void; // Callback prioritás változtatásra
-  description?: string; // Feladat leírása
-  onChangeDescription?: (text: string) => void; // Callback leírás változtatásra
-  deadline?: string; // Feladat határideje
-  onChangeDeadline?: (date: string) => void; // Callback határidő változtatásra
-  subtasks?: Subtask[]; // Alfeladatok
-  onChangeSubtasks?: (subtasks: Subtask[]) => void; // Callback alfeladatok frissítésére
-  taskType?: TaskType; // Feladat típusa
-  onChangeTaskType?: (type: TaskType) => void; // Callback típustípus változtatásra
+  priority?: string;
+  description?: string;
+  deadline?: string;
+  subtasks?: Subtask[];
+  taskType?: TaskType;
+
+  onChange?: (
+    data: Partial<{
+      priority: string;
+      description: string;
+      deadline: string;
+      subtasks: Subtask[];
+      taskType: TaskType;
+    }>,
+  ) => void;
+
   onSave?: (task: {
     description: string;
     deadline: string;
     taskType: TaskType;
     priority?: string;
     subtasks: Subtask[];
-  }) => void; // Callback mentésre
+  }) => void;
 };
 
-// TaskDetails funkcionális komponens
 export const TaskDetails: FC<Props> = ({
   priority,
-  onChangePriority,
-  description = "", // Alapértelmezett üres leírás
-  onChangeDescription,
-  deadline = "", // Alapértelmezett üres dátum
-  onChangeDeadline,
-  subtasks = [], // Alapértelmezett üres alfeladat lista
-  onChangeSubtasks = () => {}, // Alapértelmezett üres függvény
-  taskType = "", // Alapértelmezett üres típus
-  onChangeTaskType = () => {}, // Alapértelmezett üres függvény
+  description = "",
+  deadline = "",
+  subtasks = [],
+  taskType = "",
+  onChange,
   onSave,
 }) => {
-  // Lokális state-ek a beviteli mezők kezelésére
-  const [desc, setDesc] = useState(description); // Leírás state
-  const [date, setDate] = useState(deadline); // Határidő state
+  const [desc, setDesc] = useState(description);
+  const [date, setDate] = useState(deadline);
+
   const [type, setType] = useState<TaskType>(
-    taskType === "home" || taskType === "work" ? taskType : "other", // Alapértelmezett típus
-  );
-  const [customType, setCustomType] = useState(
-    taskType !== "home" && taskType !== "work" ? taskType : "", // Egyedi típus
+    taskType === "home" || taskType === "work" ? taskType : "other",
   );
 
-  // Végső típus: ha "other", akkor a felhasználó által megadott egyedi típus
+  const [customType, setCustomType] = useState(
+    taskType !== "home" && taskType !== "work" ? taskType : "",
+  );
+
   const finalType = type === "other" ? customType : type;
 
-  // Mentés gomb kezelése
   const handleSave = () => {
-    const taskData = {
+    onSave?.({
       description: desc,
       deadline: date,
       taskType: finalType,
       priority,
       subtasks,
-    };
-    onSave?.(taskData); // Ha van onSave callback, meghívjuk
+    });
   };
 
   return (
     <View className="mt-2 space-y-3">
-      {/* Description input */}
+      {/* Description */}
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Description..."
         value={desc}
         onChangeText={(text) => {
-          setDesc(text); // Lokális state frissítése
-          onChangeDescription?.(text); // Szülő értesítése
+          setDesc(text);
+          onChange?.({ description: text });
         }}
         multiline
       />
 
-      {/* Deadline input */}
+      {/* Deadline */}
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Deadline (YYYY-MM-DD)"
         value={date}
         onChangeText={(text) => {
-          setDate(text); // Lokális state frissítése
-          onChangeDeadline?.(text); // Szülő értesítése
+          setDate(text);
+          onChange?.({ deadline: text });
         }}
       />
 
-      {/* TaskType választó gombok */}
+      {/* Task Type */}
       <View className="flex-row space-x-2">
         {["home", "work", "other"].map((t) => (
           <TouchableOpacity
-            key={t} // Egyedi kulcs
+            style={{ pointerEvents: "auto" }}
+            key={t}
             onPress={() => {
-              setType(t); // Lokális state frissítése
-              onChangeTaskType(t); // Szülő értesítése
+              setType(t);
+              onChange?.({ taskType: t });
             }}
             className={`px-3 py-2 rounded-xl border ${
               type === t
@@ -126,24 +120,28 @@ export const TaskDetails: FC<Props> = ({
         ))}
       </View>
 
-      {/* Custom type input, csak ha "other" típus */}
+      {/* Custom type */}
       {type === "other" && (
         <TextInput
           className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
           placeholder="Enter custom type"
           value={customType}
           onChangeText={(text) => {
-            setCustomType(text); // Lokális state frissítése
-            onChangeTaskType(text); // Szülő értesítése
+            setCustomType(text);
+            onChange?.({ taskType: text });
           }}
         />
       )}
 
-      {/* Subtask lista komponens */}
-      <SubtaskList subtasks={subtasks} onChangeSubtasks={onChangeSubtasks} />
+      {/* Subtasks */}
+      <SubtaskList
+        subtasks={subtasks}
+        onChangeSubtasks={(updated) => onChange?.({ subtasks: updated })}
+      />
 
-      {/* Mentés gomb */}
+      {/* Save */}
       <TouchableOpacity
+        style={{ pointerEvents: "auto" }}
         onPress={handleSave}
         className="bg-blue-500 rounded-xl p-3 mt-3 items-center"
       >

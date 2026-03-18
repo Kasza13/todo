@@ -5,7 +5,7 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 // Importáljuk a Priority és Task típusokat a projekt index fájljából
 import { Priority } from "@/types/Priority";
-import { Task } from "./app/index";
+import { Task } from "../app/index";
 
 // Props típusdefiníció a SearchBar komponenshez
 type Props = {
@@ -80,6 +80,7 @@ export const SearchBar: React.FC<Props> = ({
 
       {/* DETAILS FILTER BUTTON - részletes szűrő gomb */}
       <TouchableOpacity
+        style={{ pointerEvents: "auto" }}
         className={`px-4 py-2 rounded-xl border self-start mb-3 ${
           detailsFilter
             ? "bg-blue-600 border-blue-600" // Aktív állapot stílusa
@@ -104,6 +105,7 @@ export const SearchBar: React.FC<Props> = ({
           <View className="flex-row flex-wrap gap-2 mb-3">
             {["all", "work", "home", "other"].map((cat) => (
               <TouchableOpacity
+                style={{ pointerEvents: "auto" }}
                 key={cat} // Egyedi kulcs a listában
                 className={`px-3 py-2 rounded-xl border ${
                   categoryFilter === cat
@@ -131,6 +133,7 @@ export const SearchBar: React.FC<Props> = ({
           <View className="flex-row flex-wrap gap-2 mb-3">
             {["all", "low", "medium", "high"].map((p) => (
               <TouchableOpacity
+                style={{ pointerEvents: "auto" }}
                 key={p}
                 className={`px-3 py-2 rounded-xl border ${
                   priorityFilter === p
@@ -154,6 +157,7 @@ export const SearchBar: React.FC<Props> = ({
 
           {/* DEADLINE FILTER - határidős szűrő */}
           <TouchableOpacity
+            style={{ pointerEvents: "auto" }}
             className={`px-4 py-2 rounded-xl border self-start ${
               deadlineOnly
                 ? "bg-purple-500 border-purple-500"

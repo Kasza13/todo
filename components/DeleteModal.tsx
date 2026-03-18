@@ -31,6 +31,7 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
         <View className="flex-row justify-end space-x-4">
           {/* Cancel gomb */}
           <TouchableOpacity
+            style={{ pointerEvents: "auto" }}
             onPress={onCancel} // Cancel callback meghívása
             className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-100"
           >
@@ -39,6 +40,7 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
 
           {/* Delete gomb */}
           <TouchableOpacity
+            style={{ pointerEvents: "auto" }}
             onPress={onConfirm} // Confirm callback meghívása
             className="px-4 py-2 rounded-lg bg-red-500"
           >

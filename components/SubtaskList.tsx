@@ -69,20 +69,20 @@ export const SubtaskList: FC<Props> = ({
           className="flex-row justify-between items-center"
         >
           {/* Subtask szöveg + completed toggle */}
-          <TouchableOpacity onPress={() => toggleCompleted(s.id)}>
-            <Text
-              className={
-                s.completed
-                  ? "line-through text-gray-400" // ha kész → áthúzott szöveg
-                  : ""
-              }
-            >
+          <TouchableOpacity
+            onPress={() => toggleCompleted(s.id)}
+            style={{ pointerEvents: "auto" }} 
+          >
+            <Text className={s.completed ? "line-through text-gray-400" : ""}>
               {s.text}
             </Text>
           </TouchableOpacity>
 
           {/* Törlés gomb */}
-          <TouchableOpacity onPress={() => deleteSubtask(s.id)}>
+          <TouchableOpacity
+            onPress={() => deleteSubtask(s.id)}
+            style={{ pointerEvents: "auto" }} 
+          >
             <Text className="text-red-500">X</Text>
           </TouchableOpacity>
         </View>
@@ -99,7 +99,11 @@ export const SubtaskList: FC<Props> = ({
         />
 
         {/* Add gomb */}
-        <TouchableOpacity className="ml-2 p-2 border" onPress={addSubtask}>
+        <TouchableOpacity
+          style={{ pointerEvents: "auto" }}
+          className="ml-2 p-2 border"
+          onPress={addSubtask}
+        >
           <Text>Add</Text>
         </TouchableOpacity>
       </View>

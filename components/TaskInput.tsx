@@ -25,10 +25,17 @@ export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
 
     {/* Add gomb */}
     <TouchableOpacity
-      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl" // Stílus: kék háttér, lekerekített sarkok
-      onPress={addTask} // Gombnyomáskor új task hozzáadása
+      onPress={addTask}
+      style={{
+        marginLeft: 12, // ml-3
+        backgroundColor: "#3B82F6", // bg-blue-500
+        paddingHorizontal: 16, // px-4
+        paddingVertical: 12, // py-3
+        borderRadius: 12, // rounded-xl
+        pointerEvents: "auto",
+      }}
     >
-      <Text className="text-white font-medium">Add</Text> {/* Gomb szöveg */}
+      <Text style={{ color: "#fff", fontWeight: "500" }}>Add</Text>
     </TouchableOpacity>
   </View>
 );
