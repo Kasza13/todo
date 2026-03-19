@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Priority } from "../types/Priority";
 import { SubtaskList } from "./SubtaskList";
 
 export type TaskType = "home" | "work" | "other" | string;
@@ -11,7 +12,7 @@ type Subtask = {
 };
 
 type Props = {
-  priority?: string;
+  priority?: Priority;
   description?: string;
   deadline?: string;
   subtasks?: Subtask[];
@@ -19,7 +20,7 @@ type Props = {
 
   onChange?: (
     data: Partial<{
-      priority: string;
+      priority: Priority;
       description: string;
       deadline: string;
       subtasks: Subtask[];
@@ -31,11 +32,12 @@ type Props = {
     description: string;
     deadline: string;
     taskType: TaskType;
-    priority?: string;
+    priority?: Priority;
     subtasks: Subtask[];
   }) => void;
 };
 
+// TaskDetails component
 export const TaskDetails: FC<Props> = ({
   priority,
   description = "",
@@ -45,19 +47,26 @@ export const TaskDetails: FC<Props> = ({
   onChange,
   onSave,
 }) => {
+  // Local state for description
   const [desc, setDesc] = useState(description);
+
+  // Local state for deadline
   const [date, setDate] = useState(deadline);
 
+  // Selected task type (home, work, other)
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
   );
 
+  // Custom type if "other" is selected
   const [customType, setCustomType] = useState(
     taskType !== "home" && taskType !== "work" ? taskType : "",
   );
 
+  // Final resolved type
   const finalType = type === "other" ? customType : type;
 
+  // Save handler
   const handleSave = () => {
     onSave?.({
       description: desc,
@@ -70,7 +79,7 @@ export const TaskDetails: FC<Props> = ({
 
   return (
     <View className="mt-2 space-y-3">
-      {/* Description */}
+      {/* Description input */}
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Description..."
@@ -82,7 +91,7 @@ export const TaskDetails: FC<Props> = ({
         multiline
       />
 
-      {/* Deadline */}
+      {/* Deadline input */}
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Deadline (YYYY-MM-DD)"
@@ -93,7 +102,7 @@ export const TaskDetails: FC<Props> = ({
         }}
       />
 
-      {/* Task Type */}
+      {/* Task type selector */}
       <View className="flex-row space-x-2">
         {["home", "work", "other"].map((t) => (
           <TouchableOpacity
@@ -120,7 +129,7 @@ export const TaskDetails: FC<Props> = ({
         ))}
       </View>
 
-      {/* Custom type */}
+      {/* Custom task type input */}
       {type === "other" && (
         <TextInput
           className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
@@ -133,13 +142,13 @@ export const TaskDetails: FC<Props> = ({
         />
       )}
 
-      {/* Subtasks */}
+      {/* Subtasks section */}
       <SubtaskList
         subtasks={subtasks}
         onChangeSubtasks={(updated) => onChange?.({ subtasks: updated })}
       />
 
-      {/* Save */}
+      {/* Save button */}
       <TouchableOpacity
         style={{ pointerEvents: "auto" }}
         onPress={handleSave}

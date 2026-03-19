@@ -1,83 +1,83 @@
-// React és React Native hook-ok importálása
+// Import React and React Native hooks
 import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 
-// Globális stílusok importálása
+// Import global styles
 import "../global.css";
 
-// Komponensek importálása
+// Import components
 import { DeleteModal } from "../components/DeleteModal";
 import { SearchBar } from "../components/SearchBar";
 import { TaskInput } from "../components/TaskInput";
 import { TaskItem } from "../components/TaskItem";
 
-// Task típus definiálása
+// Define Task type
 export type Task = {
-  id: string; // Egyedi azonosító
-  text: string; // Feladat szövege
-  completed: boolean; // Kész státusz
-  priority: Priority; // Prioritás szint
-  description?: string; // Opcionális leírás
-  deadline?: string; // Opcionális határidő
-  taskType?: string; // Opcionális típus
-  subtasks?: { id: string; text: string; completed: boolean }[]; // Opcionális alfeladatok
+  id: string; // Unique identifier
+  text: string; // Task text
+  completed: boolean; // Completed status
+  priority: Priority; // Priority level
+  description?: string; // Optional description
+  deadline?: string; // Optional deadline
+  taskType?: string; // Optional type
+  subtasks?: { id: string; text: string; completed: boolean }[]; // Optional subtasks
 };
 
-// Prioritás enum
+// Priority enum
 export enum Priority {
   Low = "low",
   Medium = "medium",
   High = "high",
 }
 
-// Prioritás súlyozás a rendezéshez
+// Priority weighting for sorting
 const priorityOrder = {
   high: 3,
   medium: 2,
   low: 1,
 };
 
-// Task rendező függvény
+// Task sorting function
 const sortTasks = (a: Task, b: Task) => {
-  // Először prioritás alapján
+  // First sort by priority
   if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   }
 
-  // Ha nincs határidő
+  // If there is no deadline
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
 
-  // Határidő szerint növekvő sorrend
+  // Sort by deadline in ascending order
   return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
 };
 
-// Fő komponens
+// Main component
 export default function Index() {
-  // Lokális állapotok
-  const [taskText, setTaskText] = useState(""); // Input mező
-  const [tasks, setTasks] = useState<Task[]>([]); // Összes task
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Szűrt taskok
-  const [modalVisible, setModalVisible] = useState(false); // Delete modal láthatósága
-  const [selectedId, setSelectedId] = useState<string | null>(null); // Törlendő task ID
-  const [expandedId, setExpandedId] = useState<string | null>(null); // Kibővített task ID
+  // Local states
+  const [taskText, setTaskText] = useState(""); // Input field
+  const [tasks, setTasks] = useState<Task[]>([]); // All tasks
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Filtered tasks
+  const [modalVisible, setModalVisible] = useState(false); // Delete modal visibility
+  const [selectedId, setSelectedId] = useState<string | null>(null); // Task ID to delete
+  const [expandedId, setExpandedId] = useState<string | null>(null); // Expanded task ID
 
-  // Új task hozzáadása
+  // Add new task
   const addTask = () => {
-    if (taskText.trim() === "") return; // Üres szöveg nem engedélyezett
+    if (taskText.trim() === "") return; // Empty text is not allowed
 
     const newTask: Task = {
-      id: Date.now().toString(), // Egyedi ID
+      id: Date.now().toString(), // Unique ID
       text: taskText,
       completed: false,
-      priority: Priority.Low, // Alapértelmezett prioritás
+      priority: Priority.Low, // Default priority
     };
 
-    setTasks((prev) => [...prev, newTask]); // Task hozzáadása
-    setTaskText(""); // Input törlése
+    setTasks((prev) => [...prev, newTask]); // Add task
+    setTaskText(""); // Clear input
   };
 
-  // Completed státusz váltása
+  // Toggle completed status
   const toggleCompleted = (id: string) => {
     setTasks((prev) =>
       prev.map((task) =>
@@ -86,13 +86,13 @@ export default function Index() {
     );
   };
 
-  // Delete modal megnyitása
+  // Open delete modal
   const openDeleteModal = (id: string) => {
     setSelectedId(id);
     setModalVisible(true);
   };
 
-  // Delete megerősítés
+  // Confirm delete
   const confirmDelete = () => {
     if (selectedId) {
       setTasks((prev) => prev.filter((task) => task.id !== selectedId));
@@ -102,20 +102,20 @@ export default function Index() {
     setSelectedId(null);
   };
 
-  // Task frissítése
+  // Update task
   const onChangeTask = (id: string, updatedTask: Partial<Task>) => {
     setTasks((prev) =>
       prev.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)),
     );
   };
 
-  // Befejezett taskok
+  // Finished tasks
   const finishedTasks = useMemo(
     () => tasks.filter((t) => t.completed),
     [tasks],
   );
 
-  // Megjelenítendő taskok: szűrt vagy összes, rendezve
+  // Tasks to display: filtered or all, sorted
   const displayedTasks = useMemo(() => {
     const source = filteredTasks.length > 0 ? filteredTasks : tasks;
     return [...source].sort(sortTasks);
@@ -123,36 +123,36 @@ export default function Index() {
 
   return (
     <View className="flex-1 bg-gray-100 px-5 pt-16">
-      {/* Search bar komponens */}
+      {/* Search bar component */}
       <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
 
-      {/* Task input komponens */}
+      {/* Task input component */}
       <TaskInput
         taskText={taskText}
         setTaskText={setTaskText}
         addTask={addTask}
       />
 
-      {/* Task lista */}
+      {/* Task list */}
       <FlatList
-        data={displayedTasks} // Megjelenítendő taskok
-        keyExtractor={(item) => item.id} // Egyedi kulcs
-        contentContainerStyle={{ paddingBottom: 120 }} // Alul padding
-        ItemSeparatorComponent={() => <View className="h-3" />} // Elem közötti távolság
+        data={displayedTasks} // Tasks to display
+        keyExtractor={(item) => item.id} // Unique key
+        contentContainerStyle={{ paddingBottom: 120 }} // Bottom padding
+        ItemSeparatorComponent={() => <View className="h-3" />} // Space between items
         renderItem={({ item }) => (
           <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
             <TaskItem
-              task={item} // Task adatai
-              isExpanded={expandedId === item.id} // Kibővítés állapota
+              task={item} // Task data
+              isExpanded={expandedId === item.id} // Expanded state
               onToggleExpand={(id) =>
                 setExpandedId(expandedId === id ? null : id)
-              } // Kibővítés váltása
-              toggleCompleted={toggleCompleted} // Completed státusz váltása
-              openDeleteModal={openDeleteModal} // Delete modal megnyitása
-              onChangeTask={onChangeTask} // Task frissítése
+              } // Toggle expand
+              toggleCompleted={toggleCompleted} // Toggle completed status
+              openDeleteModal={openDeleteModal} // Open delete modal
+              onChangeTask={onChangeTask} // Update task
               showFinishedLabel={
                 finishedTasks.findIndex((t) => t.id === item.id) === 0
-              } // "Finished" label az első kész tasknál
+              } // "Finished" label for the first completed task
             />
           </View>
         )}
@@ -160,7 +160,7 @@ export default function Index() {
 
       {/* Delete modal */}
       <DeleteModal
-        visible={modalVisible} // Láthatóság
+        visible={modalVisible} // Visibility
         onCancel={() => setModalVisible(false)} // Cancel callback
         onConfirm={confirmDelete} // Confirm callback
       />

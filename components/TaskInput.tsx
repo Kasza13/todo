@@ -1,41 +1,33 @@
-// FC (Function Component) típus importálása Reactből
+// Import the FC (Function Component) type from React
 import { FC } from "react";
-// React Native UI komponensek importálása
+// Import React Native UI components
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// Props típusdefiníció a TaskInput komponenshez
+// Props type definition for the TaskInput component
 type Props = {
-  taskText: string; // A beviteli mező értéke
-  setTaskText: (text: string) => void; // Callback a szöveg frissítésére
-  addTask: () => void; // Callback új task hozzáadására
+  taskText: string; // Value of the input field
+  setTaskText: (text: string) => void; // Callback to update the text
+  addTask: () => void; // Callback to add a new task
 };
 
-// TaskInput funkcionális komponens definiálása
+// TaskInput functional component
 export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
-  // Fő wrapper: sorba rendezett elemek (input és gomb)
+  // Main wrapper: elements arranged in a row (input and button)
   <View className="flex-row items-center mb-4">
-    {/* Input mező */}
+    {/* Input field */}
     <TextInput
-      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800" // Stílus
-      placeholder="New task..." // Helykitöltő szöveg
-      placeholderTextColor="#9ca3af" // Szürke helykitöltő szín
-      value={taskText} // Input értéke a state-ből
-      onChangeText={setTaskText} // Input változásakor frissítjük a state-et
+      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-400"
+      placeholder="New task..."
+      value={taskText}
+      onChangeText={setTaskText}
     />
 
-    {/* Add gomb */}
+    {/* Add button */}
     <TouchableOpacity
       onPress={addTask}
-      style={{
-        marginLeft: 12, // ml-3
-        backgroundColor: "#3B82F6", // bg-blue-500
-        paddingHorizontal: 16, // px-4
-        paddingVertical: 12, // py-3
-        borderRadius: 12, // rounded-xl
-        pointerEvents: "auto",
-      }}
+      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl"
     >
-      <Text style={{ color: "#fff", fontWeight: "500" }}>Add</Text>
+      <Text className="text-white font-medium">Add</Text>
     </TouchableOpacity>
   </View>
 );

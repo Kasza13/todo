@@ -1,104 +1,104 @@
 import { FC, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// Subtask (részfeladat) típusa
+// Subtask type
 type Subtask = {
-  id: string; // egyedi azonosító
-  text: string; // részfeladat szövege
-  completed: boolean; // kész van-e
+  id: string; // unique identifier
+  text: string; // subtask text
+  completed: boolean; // completion status
 };
 
-// A komponens által kapott propsok
+// Props received by the component
 type Props = {
-  // adatok amelyeket egy React komponens kívülről kap.
-  subtasks?: Subtask[]; // részfeladatok listája (opcionális)
-  onChangeSubtasks: (updated: Subtask[]) => void; // függvény a lista frissítésére
+  // Data that a React component receives from outside
+  subtasks?: Subtask[]; // list of subtasks (optional)
+  onChangeSubtasks: (updated: Subtask[]) => void; // function to update the list
 };
 
-// SubtaskList komponens
+// SubtaskList component
 export const SubtaskList: FC<Props> = ({
-  subtasks = [], // ha nincs átadva → üres lista
-  onChangeSubtasks = () => {}, // alapértelmezett üres függvény
+  subtasks = [], // if not provided → empty list
+  onChangeSubtasks = () => {}, // default empty function
 }) => {
-  // Lokális state az új subtask szövegéhez
+  // Local state for the new subtask text
   const [newSubtask, setNewSubtask] = useState("");
 
-  // Új subtask hozzáadása
+  // Add a new subtask
   const addSubtask = () => {
-    // Ha üres vagy csak szóköz → nem csinál semmit
+    // If empty or only spaces → do nothing
     if (newSubtask.trim() === "") return;
 
-    // Új subtask objektum létrehozása
+    // Create a new subtask object
     const sub: Subtask = {
-      id: Date.now().toString(), // egyedi ID
-      text: newSubtask, // subtask szöveg
-      completed: false, // alapból nincs kész
+      id: Date.now().toString(), // unique ID
+      text: newSubtask, // subtask text
+      completed: false, // not completed by default
     };
 
-    // Frissítjük a parent state-et az új subtaskkal
+    // Update the parent state with the new subtask
     onChangeSubtasks([...subtasks, sub]);
 
-    // Input mező kiürítése
+    // Clear the input field
     setNewSubtask("");
   };
 
-  // Subtask completed állapotának váltása
+  // Toggle subtask completed state
   const toggleCompleted = (id: string) => {
     onChangeSubtasks(
       subtasks.map(
         (s) =>
-          // Ha az ID egyezik → completed érték megfordítása
-          s.id === id ? { ...s, completed: !s.completed } : s, //...s, az eredeti objektum minden mezőjét átmásolja
+          // If the ID matches → toggle completed value
+          s.id === id ? { ...s, completed: !s.completed } : s, // ...s copies all fields from the original object
       ),
     );
   };
 
-  // Subtask törlése
+  // Delete a subtask
   const deleteSubtask = (id: string) => {
-    // Szűrés: minden marad, kivéve a törlendő
+    // Filter: keep everything except the one to delete
     onChangeSubtasks(subtasks.filter((s) => s.id !== id));
   };
 
   return (
-    // Konténer
+    // Container
     <View className="mt-2 space-y-2">
-      {/* Subtask lista */}
+      {/* Subtask list */}
       {subtasks.map((s) => (
         <View
-          key={s.id} // React kulcs
+          key={s.id} // React key
           className="flex-row justify-between items-center"
         >
-          {/* Subtask szöveg + completed toggle */}
+          {/* Subtask text + completed toggle */}
           <TouchableOpacity
             onPress={() => toggleCompleted(s.id)}
-            style={{ pointerEvents: "auto" }} 
+            style={{ pointerEvents: "auto" }}
           >
             <Text className={s.completed ? "line-through text-gray-400" : ""}>
               {s.text}
             </Text>
           </TouchableOpacity>
 
-          {/* Törlés gomb */}
+          {/* Delete button */}
           <TouchableOpacity
             onPress={() => deleteSubtask(s.id)}
-            style={{ pointerEvents: "auto" }} 
+            style={{ pointerEvents: "auto" }}
           >
             <Text className="text-red-500">X</Text>
           </TouchableOpacity>
         </View>
       ))}
 
-      {/* Új subtask hozzáadása */}
+      {/* Add new subtask */}
       <View className="flex-row mt-2">
-        {/* Input mező */}
+        {/* Input field */}
         <TextInput
           className="flex-1 border p-2"
           placeholder="Add subtask..."
           value={newSubtask}
-          onChangeText={setNewSubtask} // gépeléskor state frissítés
+          onChangeText={setNewSubtask} // update state while typing
         />
 
-        {/* Add gomb */}
+        {/* Add button */}
         <TouchableOpacity
           style={{ pointerEvents: "auto" }}
           className="ml-2 p-2 border"

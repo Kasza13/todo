@@ -1,125 +1,125 @@
-// Importáljuk a React és szükséges hookokat
+// Import React and the required hooks
 import React, { useEffect, useState } from "react";
-// Importáljuk a React Native UI komponenseket
+// Import React Native UI components
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// Importáljuk a Priority és Task típusokat a projekt index fájljából
+// Import Priority and Task types from the project
 import { Priority } from "@/types/Priority";
 import { Task } from "../app/index";
 
-// Props típusdefiníció a SearchBar komponenshez
+// Props type definition for the SearchBar component
 type Props = {
-  tasks: Task[]; // A szűrendő feladatok tömbje
-  onFilter: (filtered: Task[]) => void; // Callback a szűrt lista visszaküldésére
-  onShowDetails?: (show: boolean) => void; // Opcionális callback a részletes szűrők állapotára
+  tasks: Task[]; // Array of tasks to filter
+  onFilter: (filtered: Task[]) => void; // Callback to return the filtered list
+  onShowDetails?: (show: boolean) => void; // Optional callback for the detailed filters state
 };
 
-// A SearchBar funkcionális komponens deklarációja
+// SearchBar functional component
 export const SearchBar: React.FC<Props> = ({
-  tasks, // Az összes task
-  onFilter, // Callback a szűrt listára
-  onShowDetails, // Callback a részletek megjelenítésére
+  tasks, // All tasks
+  onFilter, // Callback for the filtered list
+  onShowDetails, // Callback to show/hide details
 }) => {
-  // Állapotok a szűrőkhöz
-  const [textFilter, setTextFilter] = useState(""); // Keresőmező szövege
-  const [categoryFilter, setCategoryFilter] = useState<string>("all"); // Kategória szűrő
-  const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all"); // Prioritás szűrő
-  const [deadlineOnly, setDeadlineOnly] = useState(false); // Határidős szűrő állapota
-  const [detailsFilter, setDetailsFilter] = useState(false); // Részletes szűrő gomb állapota
+  // Filter states
+  const [textFilter, setTextFilter] = useState(""); // Search input text
+  const [categoryFilter, setCategoryFilter] = useState<string>("all"); // Category filter
+  const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all"); // Priority filter
+  const [deadlineOnly, setDeadlineOnly] = useState(false); // Deadline-only filter state
+  const [detailsFilter, setDetailsFilter] = useState(false); // Detailed filter button state
 
-  // useEffect a szűrés és callback-ek kezelésére
+  // useEffect to handle filtering and callbacks
   useEffect(() => {
-    // Szűrt lista létrehozása
+    // Create filtered list
     const filtered = tasks.filter((task) => {
-      // Szöveg egyezés ellenőrzése
+      // Check text match
       const textMatch = task.text
         .toLowerCase()
         .includes(textFilter.toLowerCase());
 
-      // Kategória egyezés ellenőrzése
+      // Check category match
       const categoryMatch =
-        categoryFilter === "all" || // "all" esetén minden kategória engedélyezett
+        categoryFilter === "all" || // Allow all categories if "all" is selected
         (typeof task.taskType === "string" &&
           task.taskType.toLowerCase() === categoryFilter);
 
-      // Prioritás egyezés ellenőrzése
+      // Check priority match
       const priorityMatch =
         priorityFilter === "all" || task.priority === priorityFilter;
 
-      // Határidős szűrő ellenőrzése
+      // Check deadline filter
       const deadlineMatch = !deadlineOnly || !!task.deadline;
 
-      // Csak azokat a taskokat engedjük át, amelyek minden feltételnek megfelelnek
+      // Only include tasks that match all conditions
       return textMatch && categoryMatch && priorityMatch && deadlineMatch;
     });
 
-    // Visszaküldjük a szülő komponensnek a szűrt listát
+    // Send filtered list back to the parent component
     onFilter(filtered);
 
-    // Ha a detailsFilter be van kapcsolva, jelezzük a szülőnek
+    // If the detailsFilter is enabled, notify the parent
     onShowDetails?.(detailsFilter);
   }, [
-    textFilter, // Függőségek: szöveg
-    categoryFilter, // Függőség: kategória
-    priorityFilter, // Függőség: prioritás
-    deadlineOnly, // Függőség: határidős
-    tasks, // Függőség: taskok
-    detailsFilter, // Függőség: részletek gomb
+    textFilter, // Dependency: text
+    categoryFilter, // Dependency: category
+    priorityFilter, // Dependency: priority
+    deadlineOnly, // Dependency: deadline filter
+    tasks, // Dependency: tasks
+    detailsFilter, // Dependency: details button
   ]);
 
-  // JSX visszaadása
+  // Return JSX
   return (
     <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-      {/* SEARCH INPUT - keresőmező */}
+      {/* SEARCH INPUT */}
       <TextInput
-        placeholder="Search tasks..." // Helykitöltő szöveg
-        value={textFilter} // Beviteli mező értéke a state-ből
-        onChangeText={setTextFilter} // Változás esetén frissítjük a state-et
+        placeholder="Search tasks..." // Placeholder text
+        value={textFilter} // Input value from state
+        onChangeText={setTextFilter} // Update state on change
         className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 mb-3"
       />
 
-      {/* DETAILS FILTER BUTTON - részletes szűrő gomb */}
+      {/* DETAILS FILTER BUTTON */}
       <TouchableOpacity
         style={{ pointerEvents: "auto" }}
         className={`px-4 py-2 rounded-xl border self-start mb-3 ${
           detailsFilter
-            ? "bg-blue-600 border-blue-600" // Aktív állapot stílusa
-            : "bg-white border-gray-300" // Inaktív állapot stílusa
+            ? "bg-blue-600 border-blue-600" // Active state style
+            : "bg-white border-gray-300" // Inactive state style
         }`}
-        onPress={() => setDetailsFilter(!detailsFilter)} // Gomb lenyomásra váltja az állapotot
+        onPress={() => setDetailsFilter(!detailsFilter)} // Toggle state on press
       >
         <Text
           className={`text-sm ${
-            detailsFilter ? "text-white" : "text-gray-700" // Szöveg színe az állapottól függ
+            detailsFilter ? "text-white" : "text-gray-700" // Text color depends on state
           }`}
         >
           Filter Details
         </Text>
       </TouchableOpacity>
 
-      {/* A többi szűrő csak akkor jelenik meg, ha a Filter Details be van kapcsolva */}
+      {/* Other filters appear only when Filter Details is enabled */}
       {detailsFilter && (
         <>
-          {/* CATEGORY FILTER - kategória szűrő */}
+          {/* CATEGORY FILTER */}
           <Text className="text-xs text-gray-500 mb-1">Category</Text>
           <View className="flex-row flex-wrap gap-2 mb-3">
             {["all", "work", "home", "other"].map((cat) => (
               <TouchableOpacity
                 style={{ pointerEvents: "auto" }}
-                key={cat} // Egyedi kulcs a listában
+                key={cat} // Unique key in the list
                 className={`px-3 py-2 rounded-xl border ${
                   categoryFilter === cat
-                    ? "bg-blue-500 border-blue-500" // Aktív gomb stílusa
-                    : "bg-white border-gray-300" // Inaktív gomb stílusa
+                    ? "bg-blue-500 border-blue-500" // Active button style
+                    : "bg-white border-gray-300" // Inactive button style
                 }`}
-                onPress={() => setCategoryFilter(cat)} // Kattintásra frissítjük az állapotot
+                onPress={() => setCategoryFilter(cat)} // Update state on press
               >
                 <Text
                   className={`text-sm ${
                     categoryFilter === cat ? "text-white" : "text-gray-700"
                   }`}
                 >
-                  {/* Kategória szöveg nagybetűvel */}
+                  {/* Capitalize category text */}
                   {cat === "all"
                     ? "All"
                     : cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -128,7 +128,7 @@ export const SearchBar: React.FC<Props> = ({
             ))}
           </View>
 
-          {/* PRIORITY FILTER - prioritás szűrő */}
+          {/* PRIORITY FILTER */}
           <Text className="text-xs text-gray-500 mb-1">Priority</Text>
           <View className="flex-row flex-wrap gap-2 mb-3">
             {["all", "low", "medium", "high"].map((p) => (
@@ -137,12 +137,12 @@ export const SearchBar: React.FC<Props> = ({
                 key={p}
                 className={`px-3 py-2 rounded-xl border ${
                   priorityFilter === p
-                    ? "bg-green-500 border-green-500" // Aktív gomb
-                    : "bg-white border-gray-300" // Inaktív gomb
+                    ? "bg-green-500 border-green-500" // Active button
+                    : "bg-white border-gray-300" // Inactive button
                 }`}
                 onPress={() =>
                   setPriorityFilter(p === "all" ? "all" : (p as Priority))
-                } // Állapot frissítése
+                } // Update state
               >
                 <Text
                   className={`text-sm ${
@@ -155,7 +155,7 @@ export const SearchBar: React.FC<Props> = ({
             ))}
           </View>
 
-          {/* DEADLINE FILTER - határidős szűrő */}
+          {/* DEADLINE FILTER */}
           <TouchableOpacity
             style={{ pointerEvents: "auto" }}
             className={`px-4 py-2 rounded-xl border self-start ${
@@ -169,7 +169,7 @@ export const SearchBar: React.FC<Props> = ({
               className={`text-sm ${deadlineOnly ? "text-white" : "text-gray-700"}`}
             >
               {deadlineOnly ? "Deadline only" : "All tasks"}{" "}
-              {/* a {" "} eltávolítva */}
+              {/* removed the {" "} note */}
             </Text>
           </TouchableOpacity>
         </>

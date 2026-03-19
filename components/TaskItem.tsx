@@ -20,6 +20,7 @@ export type Task = {
   subtasks?: Subtask[];
 };
 
+// Props for the TaskItem component
 type Props = {
   task: Task;
   isExpanded: boolean;
@@ -30,6 +31,7 @@ type Props = {
   showFinishedLabel?: boolean;
 };
 
+// TaskItem component
 export const TaskItem: FC<Props> = ({
   task,
   isExpanded,
@@ -39,6 +41,7 @@ export const TaskItem: FC<Props> = ({
   onChangeTask,
   showFinishedLabel = false,
 }) => {
+  // Returns the text color based on priority
   const getPriorityColor = () => {
     switch (task.priority) {
       case Priority.High:
@@ -52,6 +55,7 @@ export const TaskItem: FC<Props> = ({
 
   return (
     <View className="mb-3">
+      {/* Label shown above the first finished task */}
       {showFinishedLabel && (
         <Text className="mb-2 text-gray-400 text-xs uppercase tracking-widest">
           Finished
@@ -59,7 +63,7 @@ export const TaskItem: FC<Props> = ({
       )}
 
       <View className="bg-white rounded-xl border border-gray-200 p-3">
-        {/* Header */}
+        {/* Header section */}
         <View className="flex-row justify-between items-center">
           {/* Task text + expand toggle */}
           <TouchableOpacity
@@ -69,15 +73,19 @@ export const TaskItem: FC<Props> = ({
           >
             <Text className="mr-2 text-gray-500">{isExpanded ? "▲" : "▼"}</Text>
             <Text
-              className={`${getPriorityColor()} text-base font-medium ${task.completed ? "line-through text-gray-400" : ""}`}
+              className={`${getPriorityColor()} text-base font-medium ${
+                task.completed ? "line-through text-gray-400" : ""
+              }`}
             >
               {task.text}
+              {/* High priority indicator */}
               {task.priority === Priority.High ? " ★" : ""}
             </Text>
           </TouchableOpacity>
 
-          {/* Right-side buttons */}
+          {/* Right-side action buttons */}
           <View className="flex-row items-center space-x-4">
+            {/* Toggle completed status */}
             <TouchableOpacity
               style={{ pointerEvents: "auto" }}
               onPress={() => toggleCompleted(task.id)}
@@ -86,6 +94,8 @@ export const TaskItem: FC<Props> = ({
                 {task.completed ? "Done" : "Active"}
               </Text>
             </TouchableOpacity>
+
+            {/* Delete task */}
             <TouchableOpacity
               style={{ pointerEvents: "auto" }}
               onPress={() => openDeleteModal(task.id)}
@@ -95,7 +105,7 @@ export const TaskItem: FC<Props> = ({
           </View>
         </View>
 
-        {/* TaskDetails */}
+        {/* Task details section */}
         {isExpanded && (
           <View className="mt-3 border-t border-gray-200 pt-3">
             <TaskDetails
