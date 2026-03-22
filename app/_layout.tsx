@@ -1,14 +1,10 @@
-// importáljuk a Stack navigátort az Expo Routerből
+// Import the Stack navigator from Expo Router
 import { Stack } from "expo-router";
 
-// Ez az alkalmazás fő layout komponense
+// This is the main layout component of the app
 export default function RootLayout() {
-  // A Stack navigációs rendszert rendereljük
-  // Ez kezeli a képernyők közötti navigációt (mint egy verem / stack)
-  // Az app mappában lévő fájlok automatikusan képernyők lesznek
+  // Render the Stack navigation system
+  // It manages navigation between screens like a stack
+  // Files in the app folder automatically become screens
   return <Stack />;
 }
-
-//Stack
-
-//Mit csinál?

@@ -12,7 +12,6 @@ type Props = {
 
 // DeleteModal functional component
 export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
-  // Modal component from React Native
   <Modal
     transparent // Transparent background
     animationType="fade" // Animation type: fade in/out
@@ -31,8 +30,7 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
         <View className="flex-row justify-end space-x-4">
           {/* Cancel button */}
           <TouchableOpacity
-            style={{ pointerEvents: "auto" }}
-            onPress={onCancel} // Call cancel callback
+            onPress={onCancel}
             className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-100"
           >
             <Text className="text-gray-800 font-medium">Cancel</Text>
@@ -40,7 +38,6 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
 
           {/* Delete button */}
           <TouchableOpacity
-            style={{ pointerEvents: "auto" }}
             onPress={onConfirm} // Call confirm callback
             className="px-4 py-2 rounded-lg bg-red-500"
           >
@@ -51,4 +48,5 @@ export const DeleteModal: FC<Props> = ({ visible, onCancel, onConfirm }) => (
     </View>
   </Modal>
 );
+
 export default DeleteModal;

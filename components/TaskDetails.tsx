@@ -47,26 +47,17 @@ export const TaskDetails: FC<Props> = ({
   onChange,
   onSave,
 }) => {
-  // Local state for description
   const [desc, setDesc] = useState(description);
-
-  // Local state for deadline
   const [date, setDate] = useState(deadline);
 
-  // Selected task type (home, work, other)
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
   );
-
-  // Custom type if "other" is selected
   const [customType, setCustomType] = useState(
     taskType !== "home" && taskType !== "work" ? taskType : "",
   );
-
-  // Final resolved type
   const finalType = type === "other" ? customType : type;
 
-  // Save handler
   const handleSave = () => {
     onSave?.({
       description: desc,
@@ -106,7 +97,6 @@ export const TaskDetails: FC<Props> = ({
       <View className="flex-row space-x-2">
         {["home", "work", "other"].map((t) => (
           <TouchableOpacity
-            style={{ pointerEvents: "auto" }}
             key={t}
             onPress={() => {
               setType(t);
@@ -150,7 +140,6 @@ export const TaskDetails: FC<Props> = ({
 
       {/* Save button */}
       <TouchableOpacity
-        style={{ pointerEvents: "auto" }}
         onPress={handleSave}
         className="bg-blue-500 rounded-xl p-3 mt-3 items-center"
       >

@@ -1,6 +1,4 @@
-// Import the FC (Function Component) type from React
 import { FC } from "react";
-// Import React Native UI components
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 // Props type definition for the TaskInput component
@@ -12,7 +10,6 @@ type Props = {
 
 // TaskInput functional component
 export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
-  // Main wrapper: elements arranged in a row (input and button)
   <View className="flex-row items-center mb-4">
     {/* Input field */}
     <TextInput
@@ -25,7 +22,7 @@ export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
     {/* Add button */}
     <TouchableOpacity
       onPress={addTask}
-      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl"
+      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl items-center justify-center"
     >
       <Text className="text-white font-medium">Add</Text>
     </TouchableOpacity>

@@ -67,7 +67,6 @@ export const TaskItem: FC<Props> = ({
         <View className="flex-row justify-between items-center">
           {/* Task text + expand toggle */}
           <TouchableOpacity
-            style={{ pointerEvents: "auto" }}
             className="flex-row items-center flex-1"
             onPress={() => onToggleExpand(task.id)}
           >
@@ -78,7 +77,6 @@ export const TaskItem: FC<Props> = ({
               }`}
             >
               {task.text}
-              {/* High priority indicator */}
               {task.priority === Priority.High ? " ★" : ""}
             </Text>
           </TouchableOpacity>
@@ -86,20 +84,14 @@ export const TaskItem: FC<Props> = ({
           {/* Right-side action buttons */}
           <View className="flex-row items-center space-x-4">
             {/* Toggle completed status */}
-            <TouchableOpacity
-              style={{ pointerEvents: "auto" }}
-              onPress={() => toggleCompleted(task.id)}
-            >
+            <TouchableOpacity onPress={() => toggleCompleted(task.id)}>
               <Text className="text-sm text-gray-500">
                 {task.completed ? "Done" : "Active"}
               </Text>
             </TouchableOpacity>
 
             {/* Delete task */}
-            <TouchableOpacity
-              style={{ pointerEvents: "auto" }}
-              onPress={() => openDeleteModal(task.id)}
-            >
+            <TouchableOpacity onPress={() => openDeleteModal(task.id)}>
               <Text className="text-sm text-red-500">Delete</Text>
             </TouchableOpacity>
           </View>

@@ -1,57 +1,73 @@
-// React és React Native importok
 import React, { useEffect, useState } from "react";
-
-// UI komponensek React Native-ból
-import { FlatList, Text, View } from "react-native";
-
-// Supabase kliens import
+import { Button, FlatList, Text, TextInput, View } from "react-native";
 import { supabase } from "./utils/supabase";
 
-// TypeScript interfész a Post típushoz
-interface Post {
-  id: number;
+interface Todo {
+  id: string;
   title: string;
-  body: string;
+  completed: boolean;
+  created_at: string;
 }
 
-// Fő alkalmazás komponens
 export default function App() {
-  // Posztok állapota
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = useState("");
 
-  // Posztok betöltése amikor az app elindul
+  // Bejelentkezés teszt felhasználóval
+  const login = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: "@email.com",
+      password: "",
+    });
+    if (error) console.error(error);
+    else console.log("Logged in:", data);
+  };
+
+  // Todos lekérése
+  const loadTodos = async () => {
+    const { data, error } = await supabase.from("todos").select("*");
+    if (error) console.error(error);
+    else if (data) setTodos(data as Todo[]);
+  };
+
+  // Új todo hozzáadása
+  const addTodo = async () => {
+    if (!newTodo.trim()) return;
+    const { data, error } = await supabase
+      .from("todos")
+      .insert([{ title: newTodo, completed: false }])
+      .select();
+    if (error) console.error(error);
+    else if (data) setTodos([...todos, ...(data as Todo[])]);
+    setNewTodo("");
+  };
+
   useEffect(() => {
-    const loadPosts = async () => {
-      // Lekérdezés a Supabase adatbázisból
-      const { data, error } = await supabase.from("posts").select("*");
-
-      // Hibakezelés
-      if (error) {
-        console.error("Supabase hiba:", error);
-        return;
-      }
-
-      // Állapot frissítése
-      if (data) {
-        setPosts(data as Post[]);
-      }
-    };
-
-    loadPosts();
+    login();
+    loadTodos();
   }, []);
 
-  // UI render
   return (
     <View className="flex-1 p-5 bg-white">
+      <View className="mb-4 flex-row">
+        <TextInput
+          className="border border-gray-300 p-2 flex-1 rounded"
+          placeholder="Új todo"
+          value={newTodo}
+          onChangeText={setNewTodo}
+        />
+        <Button title="Add" onPress={addTodo} />
+      </View>
       <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id.toString()}
+        data={todos}
+        keyExtractor={(item) => item.id}
         ItemSeparatorComponent={() => <View className="h-4" />}
         renderItem={({ item }) => (
           <View className="p-4 border border-gray-300 rounded-lg bg-gray-50">
             <Text className="font-bold mb-1 text-base">{item.title}</Text>
-
-            <Text className="text-gray-700">{item.body}</Text>
+            <Text className="text-gray-700">
+              {item.completed ? "✅ Completed" : "❌ Pending"}
+            </Text>
           </View>
         )}
       />
