@@ -11,7 +11,7 @@ export type Subtask = {
 
 export type Task = {
   id: string;
-  text: string;
+  title: string;
   completed: boolean;
   priority: Priority;
   description?: string;
@@ -76,7 +76,7 @@ export const TaskItem: FC<Props> = ({
                 task.completed ? "line-through text-gray-400" : ""
               }`}
             >
-              {task.text}
+              {task.title}
               {task.priority === Priority.High ? " ★" : ""}
             </Text>
           </TouchableOpacity>

@@ -55,6 +55,7 @@ export default function Index() {
   useEffect(() => {
     const loadTasks = async () => {
       const { data, error } = await supabase.from("todos").select("*");
+      console.log(data)
       if (error) console.error("Error fetching tasks:", error);
       else if (data) setTasks(data as Task[]);
     };
