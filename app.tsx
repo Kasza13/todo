@@ -13,37 +13,29 @@ export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
 
-  // Bejelentkezés teszt felhasználóval
-  const login = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: "@email.com",
-      password: "",
-    });
-    if (error) console.error(error);
-    else console.log("Logged in:", data);
-  };
-
-  // Todos lekérése
+  // Load todos from database
   const loadTodos = async () => {
     const { data, error } = await supabase.from("todos").select("*");
-    if (error) console.error(error);
+    if (error) console.error("Error loading todos:", error);
     else if (data) setTodos(data as Todo[]);
   };
 
-  // Új todo hozzáadása
+  // Add new todo
   const addTodo = async () => {
     if (!newTodo.trim()) return;
+
     const { data, error } = await supabase
       .from("todos")
       .insert([{ title: newTodo, completed: false }])
       .select();
-    if (error) console.error(error);
-    else if (data) setTodos([...todos, ...(data as Todo[])]);
+
+    if (error) console.error("Error adding todo:", error);
+    else if (data) setTodos((prev) => [...prev, ...(data as Todo[])]);
+
     setNewTodo("");
   };
 
   useEffect(() => {
-    login();
     loadTodos();
   }, []);
 
@@ -52,12 +44,13 @@ export default function App() {
       <View className="mb-4 flex-row">
         <TextInput
           className="border border-gray-300 p-2 flex-1 rounded"
-          placeholder="Új todo"
+          placeholder="New todo"
           value={newTodo}
           onChangeText={setNewTodo}
         />
         <Button title="Add" onPress={addTodo} />
       </View>
+
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id}
