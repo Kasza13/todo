@@ -5,7 +5,11 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 // Import Priority and Task types from the project
 import { Priority } from "@/types/Priority";
+<<<<<<< HEAD
 import { Task } from "../app/index";
+=======
+import { Task } from "../app/(app)/index";
+>>>>>>> 0c63222 (push fix)
 
 // Props type definition for the SearchBar component
 type Props = {
@@ -61,18 +65,30 @@ export const SearchBar: React.FC<Props> = ({
   ]);
 
   return (
+<<<<<<< HEAD
     <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+=======
+    <View className="mb-4 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+>>>>>>> 0c63222 (push fix)
       {/* SEARCH INPUT */}
       <TextInput
         placeholder="Search tasks..."
         value={textFilter}
         onChangeText={setTextFilter}
+<<<<<<< HEAD
         className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 mb-3"
+=======
+        className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 mb-2 text-sm"
+>>>>>>> 0c63222 (push fix)
       />
 
       {/* DETAILS FILTER BUTTON */}
       <TouchableOpacity
+<<<<<<< HEAD
         className={`px-4 py-2 rounded-xl border self-start mb-3 ${
+=======
+        className={`px-3 py-1 rounded-lg border self-start mb-2 ${
+>>>>>>> 0c63222 (push fix)
           detailsFilter
             ? "bg-blue-600 border-blue-600"
             : "bg-white border-gray-300"
@@ -80,7 +96,11 @@ export const SearchBar: React.FC<Props> = ({
         onPress={() => setDetailsFilter(!detailsFilter)}
       >
         <Text
+<<<<<<< HEAD
           className={`text-sm ${detailsFilter ? "text-white" : "text-gray-700"}`}
+=======
+          className={`text-xs ${detailsFilter ? "text-white" : "text-gray-700"}`}
+>>>>>>> 0c63222 (push fix)
         >
           Filter Details
         </Text>
