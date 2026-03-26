@@ -74,7 +74,7 @@ export const TaskDetails: FC<Props> = ({
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Description..."
-        value={desc}
+        value={desc ?? ""}
         onChangeText={(text) => {
           setDesc(text);
           onChange?.({ description: text });
@@ -86,7 +86,7 @@ export const TaskDetails: FC<Props> = ({
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Deadline (YYYY-MM-DD)"
-        value={date}
+        value={date ?? ""}
         onChangeText={(text) => {
           setDate(text);
           onChange?.({ deadline: text });
@@ -124,7 +124,7 @@ export const TaskDetails: FC<Props> = ({
         <TextInput
           className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
           placeholder="Enter custom type"
-          value={customType}
+          value={customType ?? ""}
           onChangeText={(text) => {
             setCustomType(text);
             onChange?.({ taskType: text });
