@@ -1,50 +1,101 @@
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-export default function Login() {
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+
+export default function LoginScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    // csak navigáció (fake login)
+    // később ide jön majd a Supabase login
     router.replace("/");
   };
 
   return (
-    <View className="flex-1 justify-center px-8 bg-gray-100">
-      <View className="bg-white p-6 rounded-3xl shadow-md">
-        <Text className="text-3xl font-bold text-center mb-2">Welcome</Text>
+    <>
+      <Stack.Screen options={{ title: "Login" }} />
 
-        <Text className="text-gray-500 text-center mb-6">
-          Sign in to continue
-        </Text>
+      <ThemedView style={styles.container}>
+        <View style={styles.card}>
+          <ThemedText type="title" style={styles.title}>
+            Welcome
+          </ThemedText>
 
-        <Text className="text-gray-600 mb-1">Email</Text>
-        <TextInput
-          placeholder="your@email.com"
-          className="border border-gray-300 rounded-xl p-3 mb-4"
-          value={email}
-          onChangeText={setEmail}
-        />
+          <ThemedText style={styles.subtitle}>Sign in to continue</ThemedText>
 
-        <Text className="text-gray-600 mb-1">Password</Text>
-        <TextInput
-          placeholder="••••••••"
-          secureTextEntry
-          className="border border-gray-300 rounded-xl p-3 mb-6"
-          value={password}
-          onChangeText={setPassword}
-        />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="your@email.com"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        <Pressable onPress={handleLogin} className="bg-blue-500 p-4 rounded-xl">
-          <Text className="text-white text-center font-semibold text-lg">
-            Login
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            placeholder="••••••••"
+            secureTextEntry
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <Pressable onPress={handleLogin} style={styles.button}>
+            <Text style={styles.buttonText}>Login</Text>
+          </Pressable>
+        </View>
+      </ThemedView>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+  },
+  card: {
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 24,
+    elevation: 4,
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  subtitle: {
+    textAlign: "center",
+    marginBottom: 20,
+    opacity: 0.7,
+  },
+  label: {
+    marginBottom: 4,
+    color: "#555",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+  },
+  button: {
+    backgroundColor: "#3b82f6",
+    padding: 14,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+});
