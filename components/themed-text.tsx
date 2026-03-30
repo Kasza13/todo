@@ -1,6 +1,5 @@
-import { Text, type TextProps, type TextStyle } from "react-native";
-
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Text, type TextProps } from "react-native";
 
 type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -16,31 +15,21 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const theme = useColorScheme();
-
   const color =
     theme === "dark" ? (darkColor ?? "#ECEDEE") : (lightColor ?? "#11181C");
 
-  return <Text style={[{ color }, typeStyles[type], style]} {...rest} />;
-}
+  const typeClassNames: Record<NonNullable<ThemedTextProps["type"]>, string> = {
+    default: "text-base leading-6",
+    title: "text-2xl font-bold leading-9",
+    subtitle: "text-lg font-semibold leading-7",
+    link: "text-base underline",
+  };
 
-const typeStyles: Record<NonNullable<ThemedTextProps["type"]>, TextStyle> = {
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    lineHeight: 28,
-  },
-  link: {
-    fontSize: 16,
-    color: "#0a7ea4",
-    textDecorationLine: "underline",
-  },
-};
+  return (
+    <Text
+      className={typeClassNames[type]}
+      style={[type === "link" ? { color: "#0a7ea4" } : { color }, style]}
+      {...rest}
+    />
+  );
+}

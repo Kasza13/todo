@@ -1,10 +1,6 @@
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
-import {
-    ScrollView,
-    StyleSheet,
-    View,
-    type ScrollViewProps
-} from "react-native";
+import { ScrollView, View, type ScrollViewProps } from "react-native";
 
 type ParallaxScrollViewProps = ScrollViewProps & {
   headerImage?: React.ReactNode;
@@ -12,8 +8,6 @@ type ParallaxScrollViewProps = ScrollViewProps & {
   children: React.ReactNode;
   headerHeight?: number;
 };
-
-import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function ParallaxScrollView({
   headerImage,
@@ -31,14 +25,18 @@ export default function ParallaxScrollView({
       : (headerBackgroundColor?.light ?? "#fff");
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <View style={[styles.header, { height: headerHeight }]}>
+    <View className="flex-1" style={{ backgroundColor }}>
+      <View
+        className="w-full overflow-hidden relative"
+        style={{ height: headerHeight }}
+      >
         {headerImage}
       </View>
 
       <ScrollView
-        style={[styles.scrollView, style]}
-        contentContainerStyle={styles.contentContainer}
+        className="flex-1"
+        contentContainerClassName="p-4"
+        style={style}
         {...rest}
       >
         {children}
@@ -46,20 +44,3 @@ export default function ParallaxScrollView({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    width: "100%",
-    overflow: "hidden",
-    position: "relative",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 16,
-  },
-});

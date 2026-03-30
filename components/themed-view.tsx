@@ -1,6 +1,5 @@
-import { View, type ViewProps } from "react-native";
-
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { View, type ViewProps } from "react-native";
 
 type ThemedViewProps = ViewProps & {
   lightColor?: string;
@@ -20,12 +19,8 @@ export function ThemedView({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor,
-        },
-        style,
-      ]}
+      className="flex-1"
+      style={[{ backgroundColor }, style]}
       {...otherProps}
     />
   );

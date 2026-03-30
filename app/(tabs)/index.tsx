@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 
 import { HelloWave } from "@/components/hello-wave";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
@@ -43,10 +43,8 @@ const sortTasks = (a: Task, b: Task) => {
   if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   }
-
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
-
   return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
 };
 
@@ -62,33 +60,28 @@ export default function HomeScreen() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace("/");
   };
 
   useEffect(() => {
     const loadTasks = async () => {
       const { data, error } = await supabase.from("todos").select("*");
-
       if (error) {
         console.error("Error fetching tasks:", error);
         return;
       }
-
       if (data) setTasks(data as Task[]);
     };
-
     loadTasks();
   }, []);
 
   const toggleCompleted = async (id: string) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
-
     await supabase
       .from("todos")
       .update({ completed: !task.completed })
       .eq("id", id);
-
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
@@ -101,9 +94,7 @@ export default function HomeScreen() {
 
   const confirmDelete = async () => {
     if (!selectedId) return;
-
     await supabase.from("todos").delete().eq("id", selectedId);
-
     setTasks((prev) => prev.filter((t) => t.id !== selectedId));
     setModalVisible(false);
     setSelectedId(null);
@@ -111,7 +102,6 @@ export default function HomeScreen() {
 
   const onChangeTask = async (id: string, updatedTask: Partial<Task>) => {
     await supabase.from("todos").update(updatedTask).eq("id", id);
-
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updatedTask } : t)),
     );
@@ -133,39 +123,64 @@ export default function HomeScreen() {
       headerImage={
         <Image
           source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
+          className="absolute bottom-0 left-0 w-[290px] h-[178px]"
         />
       }
     >
       {/* PROFILE SECTION */}
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+      <ThemedView className="flex-row items-center gap-2 mb-4">
+        <ThemedText type="title" lightColor="#11181C" darkColor="#ECEDEE">
+          Welcome!
+        </ThemedText>
         <HelloWave />
       </ThemedView>
 
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Username</ThemedText>
-        <ThemedText>{profile?.username}</ThemedText>
+      <ThemedView className="gap-2 mb-4">
+        <ThemedText type="subtitle" lightColor="#11181C" darkColor="#ECEDEE">
+          Username
+        </ThemedText>
+        <ThemedText lightColor="#11181C" darkColor="#ECEDEE">
+          {profile?.username}
+        </ThemedText>
 
-        <ThemedText type="subtitle">Full name</ThemedText>
-        <ThemedText>{profile?.full_name}</ThemedText>
+        <ThemedText type="subtitle" lightColor="#11181C" darkColor="#ECEDEE">
+          Full name
+        </ThemedText>
+        <ThemedText lightColor="#11181C" darkColor="#ECEDEE">
+          {profile?.full_name}
+        </ThemedText>
       </ThemedView>
 
       {/* LOGOUT */}
-      <Pressable onPress={logout} style={styles.logoutButton}>
-        <Text style={{ color: "white" }}>Logout</Text>
+      <Pressable
+        className="self-end bg-red-500 px-4 py-2 rounded-lg mb-4"
+        onPress={logout}
+      >
+        <ThemedText lightColor="#fff" darkColor="#fff">
+          Logout
+        </ThemedText>
       </Pressable>
 
       {/* SEARCH */}
-      <Text className="text-gray-700 text-lg font-semibold mb-2">
+      <ThemedText
+        type="subtitle"
+        className="mb-2"
+        lightColor="#11181C"
+        darkColor="#ECEDEE"
+      >
         Search Tasks
-      </Text>
+      </ThemedText>
       <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
 
       {/* TASK LIST */}
-      <Text className="text-gray-700 text-lg font-semibold mt-4 mb-2">
+      <ThemedText
+        type="subtitle"
+        className="mt-4 mb-2"
+        lightColor="#11181C"
+        darkColor="#ECEDEE"
+      >
         Task List
-      </Text>
+      </ThemedText>
 
       <FlatList
         data={displayedTasks}
@@ -199,30 +214,3 @@ export default function HomeScreen() {
     </ParallaxScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-  logoutButton: {
-    alignSelf: "flex-end",
-    backgroundColor: "#ef4444",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
-    marginBottom: 16,
-  },
-});
