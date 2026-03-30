@@ -5,7 +5,7 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 // Import Priority and Task types from the project
 import { Priority } from "@/types/Priority";
-import { Task } from "../app/(app)/index";
+import { Task } from "../app/(tabs)/index";
 
 // Props type definition for the SearchBar component
 type Props = {

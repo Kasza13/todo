@@ -1,5 +1,11 @@
 import { Session } from "@supabase/supabase-js";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { supabase } from "./supabase";
 
 type AuthContextType = {
@@ -8,13 +14,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  loading: true,
-  signOut: async () => {},
-});
-
-import { ReactNode } from "react";
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 type AuthProviderProps = {
   children: ReactNode;
@@ -52,4 +52,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  return context;
+};
