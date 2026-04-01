@@ -25,36 +25,37 @@ type Props = {
 
 export default function AuthProvider({ children }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     const loadProfile = async (userId: string) => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (error) {
-        console.error("Failed to load profile:", error);
-        setProfile(null);
-        return;
+      if (data) {
+        setProfile({
+          id: data.id,
+          email: data.email,
+          username: data.username,
+          full_name: data.full_name,
+        });
       }
-
-      setProfile({
-        id: data.id,
-        email: data.email,
-        username: data.username,
-        full_name: data.full_name,
-      });
     };
 
     supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+
       if (data.session?.user) {
         loadProfile(data.session.user.id);
       }
     });
 
     const listener = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+
       if (session?.user) {
         loadProfile(session.user.id);
       } else {
@@ -63,17 +64,18 @@ export default function AuthProvider({ children }: Props) {
     });
 
     return () => {
-      listener.data?.subscription?.unsubscribe?.();
+      listener.data.subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setSession(null);
   };
 
   const value: AuthContextType = {
-    isLoggedIn: !!profile,
+    isLoggedIn: !!session,
     profile,
     setProfile,
     signOut,

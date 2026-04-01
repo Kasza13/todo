@@ -12,7 +12,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    router.replace("/");
+    router.replace("/login");
   };
 
   return (

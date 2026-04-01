@@ -60,7 +60,7 @@ export default function HomeScreen() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    router.replace("/");
+    router.replace("/(auth)/login");
   };
 
   useEffect(() => {

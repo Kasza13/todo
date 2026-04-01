@@ -25,11 +25,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Betöltés
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
     });
 
+    // Listener auth változásra
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
@@ -37,12 +39,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     return () => {
-      listener.subscription.unsubscribe();
+      listener?.subscription?.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setSession(null);
   };
 
   return (
