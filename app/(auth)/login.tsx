@@ -1,9 +1,9 @@
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { supabase } from "../../utils/supabase";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -11,8 +11,25 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // later async function with try/catch
   const handleLogin = () => {
-    router.replace("/login");
+    if (email === "" || password === "") {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    supabase.auth
+      .signInWithPassword({
+        email,
+        password,
+      })
+      .then(({ error }) => {
+        if (error) {
+          alert(error.message);
+        } else {
+          router.push("/");
+        }
+      });
   };
 
   return (
