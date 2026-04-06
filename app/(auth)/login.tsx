@@ -4,15 +4,43 @@ import { Pressable, Text, TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { supabase } from "@/utils/supabase";
 
 export default function LoginScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = () => {
-    router.replace("/login");
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      setErrorMessage("Please enter your email and password.");
+      return;
+    }
+
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      router.replace("/(tabs)/index");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -44,19 +72,26 @@ export default function LoginScreen() {
 
           <Text className="mb-1 text-gray-700 font-medium">Password</Text>
           <TextInput
-            placeholder="••••••••"
+            placeholder="********"
             secureTextEntry
             className="border border-gray-300 rounded-xl p-3 mb-5"
             value={password}
             onChangeText={setPassword}
           />
 
+          {errorMessage ? (
+            <Text className="text-red-500 text-sm mb-3">{errorMessage}</Text>
+          ) : null}
+
           <Pressable
             onPress={handleLogin}
-            className="bg-blue-500 rounded-xl p-4 mt-2"
+            disabled={isSubmitting}
+            className={`rounded-xl p-4 mt-2 ${
+              isSubmitting ? "bg-blue-300" : "bg-blue-500"
+            }`}
           >
             <Text className="text-white text-center font-semibold text-base">
-              Login
+              {isSubmitting ? "Logging in..." : "Login"}
             </Text>
           </Pressable>
         </View>
