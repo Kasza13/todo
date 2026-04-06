@@ -1,45 +1,49 @@
-import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { supabase } from "@/utils/supabase";
+import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { supabase } from "../../utils/supabase";
 
 export default function LoginScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password) {
-      setErrorMessage("Please enter your email and password.");
+    if (!email || !password) {
+      alert("Please fill in all fields");
       return;
     }
 
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
+    setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email,
         password,
       });
 
       if (error) {
-        throw error;
+        throw new Error(error.message);
       }
 
-      router.replace("/(tabs)/index");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Something went wrong");
+      router.push("/");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong";
+      console.error("Login error:", err);
+      alert(message);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -72,27 +76,27 @@ export default function LoginScreen() {
 
           <Text className="mb-1 text-gray-700 font-medium">Password</Text>
           <TextInput
-            placeholder="********"
+            placeholder="••••••••"
             secureTextEntry
             className="border border-gray-300 rounded-xl p-3 mb-5"
             value={password}
             onChangeText={setPassword}
           />
 
-          {errorMessage ? (
-            <Text className="text-red-500 text-sm mb-3">{errorMessage}</Text>
-          ) : null}
-
           <Pressable
             onPress={handleLogin}
-            disabled={isSubmitting}
+            disabled={loading}
             className={`rounded-xl p-4 mt-2 ${
-              isSubmitting ? "bg-blue-300" : "bg-blue-500"
+              loading ? "bg-blue-300" : "bg-blue-500"
             }`}
           >
-            <Text className="text-white text-center font-semibold text-base">
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-white text-center font-semibold text-base">
+                Login
+              </Text>
+            )}
           </Pressable>
         </View>
       </ThemedView>
