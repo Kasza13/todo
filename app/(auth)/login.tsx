@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -17,6 +17,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -53,16 +54,13 @@ export default function LoginScreen() {
 
       <ThemedView className="flex-1 justify-center px-6 bg-gray-50">
         <View className="bg-white p-6 rounded-3xl shadow-md">
-          <ThemedText
-            type="title"
-            className="text-center mb-2 text-2xl font-bold"
-          >
+          <Text className="text-center mb-2 text-2xl text-black font-bold">
             Welcome
-          </ThemedText>
+          </Text>
 
-          <ThemedText className="text-center mb-5 text-gray-500">
+          <Text className="text-center mb-5 text-black">
             Sign in to continue
-          </ThemedText>
+          </Text>
 
           <Text className="mb-1 text-gray-700 font-medium">Email</Text>
           <TextInput
@@ -75,13 +73,28 @@ export default function LoginScreen() {
           />
 
           <Text className="mb-1 text-gray-700 font-medium">Password</Text>
-          <TextInput
-            placeholder="••••••••"
-            secureTextEntry
-            className="border border-gray-300 rounded-xl p-3 mb-5"
-            value={password}
-            onChangeText={setPassword}
-          />
+
+          {/* Profi password input */}
+          <View className="mb-5 relative">
+            <TextInput
+              placeholder="••••••••"
+              secureTextEntry={!showPassword}
+              className="border border-gray-300 rounded-xl p-3 pr-10"
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color="gray"
+              />
+            </Pressable>
+          </View>
 
           <Pressable
             onPress={handleLogin}
