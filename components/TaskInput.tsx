@@ -1,30 +1,25 @@
-import { FC } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
-// Props type definition for the TaskInput component
 type Props = {
-  taskText: string; // Value of the input field
-  setTaskText: (text: string) => void; // Callback to update the text
-  addTask: () => void; // Callback to add a new task
+  taskText: string;
+  setTaskText: (text: string) => void;
+  addTask: () => void;
 };
 
-// TaskInput functional component
-export const TaskInput: FC<Props> = ({ taskText, setTaskText, addTask }) => (
-  <View className="flex-row items-center mb-4">
-    {/* Input field */}
-    <TextInput
-      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-400"
-      placeholder="New task..."
-      value={taskText}
-      onChangeText={setTaskText}
-    />
+export const TaskInput = ({ taskText, setTaskText, addTask }: Props) => {
+  return (
+    <View className="flex-row items-center gap-2 mb-4">
+      <TextInput
+        value={taskText}
+        onChangeText={setTaskText}
+        placeholder="Add new task..."
+        className="flex-1 border border-gray-300 rounded-xl px-3 py-2 bg-white"
+      />
 
-    {/* Add button */}
-    <TouchableOpacity
-      onPress={addTask}
-      className="ml-3 bg-blue-500 px-4 py-3 rounded-xl items-center justify-center"
-    >
-      <Text className="text-white font-medium">Add</Text>
-    </TouchableOpacity>
-  </View>
-);
+      <Pressable onPress={addTask} className="bg-blue-500 px-4 py-2 rounded-xl">
+        <Text className="text-white font-semibold">Add</Text>
+      </Pressable>
+    </View>
+  );
+};

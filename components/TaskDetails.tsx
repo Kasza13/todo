@@ -12,9 +12,9 @@ type Subtask = {
 };
 
 type Props = {
-  priority?: Priority;
+  priority?: Priority; // Low/Medium/High
   description?: string;
-  deadline?: string;
+  deadline?: string; // YYYY-MM-DD
   subtasks?: Subtask[];
   taskType?: TaskType;
 
@@ -29,17 +29,23 @@ type Props = {
   ) => void;
 
   onSave?: (task: {
-    description: string;
-    deadline: string;
-    taskType: TaskType;
-    priority?: Priority;
+    description: string | null;
+    deadline: string | null;
+    type: string | null;
+    priority: number; // Supabase int2
     subtasks: Subtask[];
   }) => void;
 };
 
-// TaskDetails component
+const priorityMap: Record<Priority, number> = {
+  [Priority.Low]: 1,
+  [Priority.Medium]: 2,
+  [Priority.High]: 3,
+};
+
+// Supabase kompatibilis TaskDetails
 export const TaskDetails: FC<Props> = ({
-  priority,
+  priority = Priority.Low,
   description = "",
   deadline = "",
   subtasks = [],
@@ -47,23 +53,23 @@ export const TaskDetails: FC<Props> = ({
   onChange,
   onSave,
 }) => {
-  const [desc, setDesc] = useState(description);
-  const [date, setDate] = useState(deadline);
+  const [desc, setDesc] = useState<string>(description);
+  const [date, setDate] = useState<string>(deadline);
 
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
   );
-  const [customType, setCustomType] = useState(
+  const [customType, setCustomType] = useState<string>(
     taskType !== "home" && taskType !== "work" ? taskType : "",
   );
   const finalType = type === "other" ? customType : type;
 
   const handleSave = () => {
     onSave?.({
-      description: desc,
-      deadline: date,
-      taskType: finalType,
-      priority,
+      description: desc.trim() || null,
+      deadline: date.trim() || null,
+      type: finalType.trim() || null,
+      priority: priorityMap[priority],
       subtasks,
     });
   };
@@ -74,7 +80,7 @@ export const TaskDetails: FC<Props> = ({
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Description..."
-        value={desc ?? ""}
+        value={desc}
         onChangeText={(text) => {
           setDesc(text);
           onChange?.({ description: text });
@@ -86,7 +92,7 @@ export const TaskDetails: FC<Props> = ({
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Deadline (YYYY-MM-DD)"
-        value={date ?? ""}
+        value={date}
         onChangeText={(text) => {
           setDate(text);
           onChange?.({ deadline: text });
@@ -99,8 +105,8 @@ export const TaskDetails: FC<Props> = ({
           <TouchableOpacity
             key={t}
             onPress={() => {
-              setType(t);
-              onChange?.({ taskType: t });
+              setType(t as TaskType);
+              onChange?.({ taskType: t as TaskType });
             }}
             className={`px-3 py-2 rounded-xl border ${
               type === t
@@ -124,7 +130,7 @@ export const TaskDetails: FC<Props> = ({
         <TextInput
           className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
           placeholder="Enter custom type"
-          value={customType ?? ""}
+          value={customType}
           onChangeText={(text) => {
             setCustomType(text);
             onChange?.({ taskType: text });

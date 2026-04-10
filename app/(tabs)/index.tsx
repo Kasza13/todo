@@ -11,6 +11,7 @@ import { useAuthContext } from "@/hooks/use-auth-context";
 
 import { DeleteModal } from "@/components/DeleteModal";
 import { SearchBar } from "@/components/SearchBar";
+import { TaskInput } from "@/components/TaskInput";
 import { TaskItem } from "@/components/TaskItem";
 import { supabase } from "@/utils/supabase";
 
@@ -20,7 +21,7 @@ export type Task = {
   id: string;
   title: string;
   completed: boolean;
-  priority: Priority;
+  priority?: Priority | null;
   description?: string;
   deadline?: string;
   taskType?: string;
@@ -33,16 +34,7 @@ export enum Priority {
   High = "high",
 }
 
-const priorityOrder: Record<Priority, number> = {
-  [Priority.High]: 3,
-  [Priority.Medium]: 2,
-  [Priority.Low]: 1,
-};
-
 const sortTasks = (a: Task, b: Task) => {
-  if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
-    return priorityOrder[b.priority] - priorityOrder[a.priority];
-  }
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
   return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
@@ -58,6 +50,8 @@ export default function HomeScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const [taskText, setTaskText] = useState("");
+
   const logout = async () => {
     await supabase.auth.signOut();
     router.replace("/(auth)/login");
@@ -67,21 +61,49 @@ export default function HomeScreen() {
     const loadTasks = async () => {
       const { data, error } = await supabase.from("todos").select("*");
       if (error) {
-        console.error("Error fetching tasks:", error);
+        console.error(error);
         return;
       }
       if (data) setTasks(data as Task[]);
     };
+
     loadTasks();
   }, []);
+
+  const addTask = async () => {
+    if (!taskText.trim()) return;
+
+    const { data, error } = await supabase
+      .from("todos")
+      .insert([
+        {
+          title: taskText,
+          completed: false,
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    if (data) {
+      setTasks((prev) => [...prev, ...(data as Task[])]);
+    }
+
+    setTaskText("");
+  };
 
   const toggleCompleted = async (id: string) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
+
     await supabase
       .from("todos")
       .update({ completed: !task.completed })
       .eq("id", id);
+
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
@@ -94,7 +116,9 @@ export default function HomeScreen() {
 
   const confirmDelete = async () => {
     if (!selectedId) return;
+
     await supabase.from("todos").delete().eq("id", selectedId);
+
     setTasks((prev) => prev.filter((t) => t.id !== selectedId));
     setModalVisible(false);
     setSelectedId(null);
@@ -102,6 +126,7 @@ export default function HomeScreen() {
 
   const onChangeTask = async (id: string, updatedTask: Partial<Task>) => {
     await supabase.from("todos").update(updatedTask).eq("id", id);
+
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updatedTask } : t)),
     );
@@ -127,58 +152,39 @@ export default function HomeScreen() {
         />
       }
     >
-      {/* PROFILE SECTION */}
       <ThemedView className="flex-row items-center gap-2 mb-4">
-        <ThemedText type="title" lightColor="#11181C" darkColor="#ECEDEE">
-          Welcome!
-        </ThemedText>
+        <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
 
       <ThemedView className="gap-2 mb-4">
-        <ThemedText type="subtitle" lightColor="#11181C" darkColor="#ECEDEE">
-          Username
-        </ThemedText>
-        <ThemedText lightColor="#11181C" darkColor="#ECEDEE">
-          {profile?.username}
-        </ThemedText>
+        <ThemedText type="subtitle">Username</ThemedText>
+        <ThemedText>{profile?.username}</ThemedText>
 
-        <ThemedText type="subtitle" lightColor="#11181C" darkColor="#ECEDEE">
-          Full name
-        </ThemedText>
-        <ThemedText lightColor="#11181C" darkColor="#ECEDEE">
-          {profile?.full_name}
-        </ThemedText>
+        <ThemedText type="subtitle">Full name</ThemedText>
+        <ThemedText>{profile?.full_name}</ThemedText>
       </ThemedView>
 
-      {/* LOGOUT */}
       <Pressable
         className="self-end bg-red-500 px-4 py-2 rounded-lg mb-4"
         onPress={logout}
       >
-        <ThemedText lightColor="#fff" darkColor="#fff">
-          Logout
-        </ThemedText>
+        <ThemedText lightColor="#fff">Logout</ThemedText>
       </Pressable>
 
-      {/* SEARCH */}
-      <ThemedText
-        type="subtitle"
-        className="mb-2"
-        lightColor="#11181C"
-        darkColor="#ECEDEE"
-      >
+      <TaskInput
+        taskText={taskText}
+        setTaskText={setTaskText}
+        addTask={addTask}
+      />
+
+      <ThemedText type="subtitle" className="mb-2">
         Search Tasks
       </ThemedText>
+
       <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
 
-      {/* TASK LIST */}
-      <ThemedText
-        type="subtitle"
-        className="mt-4 mb-2"
-        lightColor="#11181C"
-        darkColor="#ECEDEE"
-      >
+      <ThemedText type="subtitle" className="mt-4 mb-2">
         Task List
       </ThemedText>
 
