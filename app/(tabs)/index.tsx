@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
 import { HelloWave } from "@/components/hello-wave";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
@@ -52,6 +52,13 @@ export default function HomeScreen() {
 
   const [taskText, setTaskText] = useState("");
 
+  const [showToast, setShowToast] = useState(false);
+
+  const showGlobalToast = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     router.replace("/(auth)/login");
@@ -90,6 +97,7 @@ export default function HomeScreen() {
 
     if (data) {
       setTasks((prev) => [...prev, ...(data as Task[])]);
+      showGlobalToast();
     }
 
     setTaskText("");
@@ -152,6 +160,15 @@ export default function HomeScreen() {
         />
       }
     >
+      {/*  GLOBAL TOP TOAST */}
+      {showToast && (
+        <View className="absolute top-10 left-0 right-0 items-center z-50">
+          <View className="bg-green-500 px-4 py-2 rounded shadow">
+            <Text className="text-white font-bold">Task added!</Text>
+          </View>
+        </View>
+      )}
+
       <ThemedView className="flex-row items-center gap-2 mb-4">
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />

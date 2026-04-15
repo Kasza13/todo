@@ -1,23 +1,22 @@
 import { FC, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// Subtask type
 type Subtask = {
-  id: string; // unique identifier
-  text: string; // subtask text
-  completed: boolean; // completion status
+  id: string;
+  text: string;
+  completed: boolean;
 };
 
-// Props received by the component
 type Props = {
-  subtasks?: Subtask[]; // list of subtasks (optional)
-  onChangeSubtasks: (updated: Subtask[]) => void; // function to update the list
+  subtasks?: Subtask[];
+  onChangeSubtasks: (updated: Subtask[]) => void;
+  onAddSuccess?: () => void;
 };
 
-// SubtaskList component
 export const SubtaskList: FC<Props> = ({
-  subtasks = [], // if not provided → empty list
-  onChangeSubtasks = () => {}, // default empty function
+  subtasks = [],
+  onChangeSubtasks = () => {},
+  onAddSuccess,
 }) => {
   const [newSubtask, setNewSubtask] = useState("");
 
@@ -32,6 +31,8 @@ export const SubtaskList: FC<Props> = ({
 
     onChangeSubtasks([...subtasks, sub]);
     setNewSubtask("");
+
+    onAddSuccess?.();
   };
 
   const toggleCompleted = (id: string) => {
@@ -50,14 +51,12 @@ export const SubtaskList: FC<Props> = ({
     <View className="mt-2 space-y-2">
       {subtasks.map((s) => (
         <View key={s.id} className="flex-row justify-between items-center">
-          {/* Subtask text + completed toggle */}
           <TouchableOpacity onPress={() => toggleCompleted(s.id)}>
             <Text className={s.completed ? "line-through text-gray-400" : ""}>
               {s.text}
             </Text>
           </TouchableOpacity>
 
-          {/* Delete button */}
           <TouchableOpacity onPress={() => deleteSubtask(s.id)}>
             <Text className="text-red-500">X</Text>
           </TouchableOpacity>
@@ -71,6 +70,7 @@ export const SubtaskList: FC<Props> = ({
           placeholder="Add subtask..."
           value={newSubtask}
           onChangeText={setNewSubtask}
+          onSubmitEditing={addSubtask}
         />
 
         <TouchableOpacity className="ml-2 p-2 border" onPress={addSubtask}>
