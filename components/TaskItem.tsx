@@ -1,6 +1,6 @@
 import { Priority } from "@/types/Priority";
-import { FC } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { FC, useState } from "react";
+import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { TaskDetails, TaskType } from "./TaskDetails";
 
 export type Subtask = {
@@ -20,7 +20,6 @@ export type Task = {
   subtasks?: Subtask[];
 };
 
-// Props for the TaskItem component
 type Props = {
   task: Task;
   isExpanded: boolean;
@@ -31,7 +30,6 @@ type Props = {
   showFinishedLabel?: boolean;
 };
 
-// TaskItem component
 export const TaskItem: FC<Props> = ({
   task,
   isExpanded,
@@ -41,7 +39,9 @@ export const TaskItem: FC<Props> = ({
   onChangeTask,
   showFinishedLabel = false,
 }) => {
-  // Returns the text color based on priority
+  const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [newTitle, setNewTitle] = useState(task.title);
+
   const getPriorityColor = () => {
     switch (task.priority) {
       case Priority.High:
@@ -53,9 +53,13 @@ export const TaskItem: FC<Props> = ({
     }
   };
 
+  const handleRename = () => {
+    onChangeTask(task.id, { title: newTitle.trim() || task.title });
+    setRenameModalVisible(false);
+  };
+
   return (
     <View className="mb-3">
-      {/* Label shown above the first finished task */}
       {showFinishedLabel && (
         <Text className="mb-2 text-gray-400 text-xs uppercase tracking-widest">
           Finished
@@ -63,14 +67,13 @@ export const TaskItem: FC<Props> = ({
       )}
 
       <View className="bg-white rounded-xl border border-gray-200 p-3">
-        {/* Header section */}
         <View className="flex-row justify-between items-center">
-          {/* Task text + expand toggle */}
           <TouchableOpacity
             className="flex-row items-center flex-1"
             onPress={() => onToggleExpand(task.id)}
           >
             <Text className="mr-2 text-gray-500">{isExpanded ? "▲" : "▼"}</Text>
+
             <Text
               className={`${getPriorityColor()} text-base font-medium ${
                 task.completed ? "line-through text-gray-400" : ""
@@ -81,23 +84,23 @@ export const TaskItem: FC<Props> = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Right-side action buttons */}
-          <View className="flex-row items-center space-x-4">
-            {/* Toggle completed status */}
+          <View className="flex-row items-center space-x-3">
             <TouchableOpacity onPress={() => toggleCompleted(task.id)}>
               <Text className="text-sm text-gray-500">
                 {task.completed ? "Done" : "Active"}
               </Text>
             </TouchableOpacity>
 
-            {/* Delete task */}
+            <TouchableOpacity onPress={() => setRenameModalVisible(true)}>
+              <Text className="text-sm text-blue-500">Rename</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => openDeleteModal(task.id)}>
               <Text className="text-sm text-red-500">Delete</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Task details section */}
         {isExpanded && (
           <View className="mt-3 border-t border-gray-200 pt-3">
             <TaskDetails
@@ -111,6 +114,32 @@ export const TaskItem: FC<Props> = ({
           </View>
         )}
       </View>
+
+      {/* RENAME MODAL */}
+      <Modal visible={renameModalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white w-80 p-4 rounded-xl">
+            <Text className="text-lg font-bold mb-3">Rename task</Text>
+
+            <TextInput
+              value={newTitle}
+              onChangeText={setNewTitle}
+              className="border border-gray-300 rounded-xl p-3 mb-3"
+              placeholder="New title..."
+            />
+
+            <View className="flex-row justify-end space-x-3">
+              <TouchableOpacity onPress={() => setRenameModalVisible(false)}>
+                <Text className="text-gray-500">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleRename}>
+                <Text className="text-blue-500 font-bold">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

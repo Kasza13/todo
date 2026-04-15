@@ -1,5 +1,14 @@
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
 import { FC, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Priority } from "../types/Priority";
 import { SubtaskList } from "./SubtaskList";
 
@@ -12,9 +21,9 @@ type Subtask = {
 };
 
 type Props = {
-  priority?: Priority; // Low/Medium/High
+  priority?: Priority;
   description?: string;
-  deadline?: string; // YYYY-MM-DD
+  deadline?: string;
   subtasks?: Subtask[];
   taskType?: TaskType;
 
@@ -32,7 +41,7 @@ type Props = {
     description: string | null;
     deadline: string | null;
     type: string | null;
-    priority: number; // Supabase int2
+    priority: number;
     subtasks: Subtask[];
   }) => void;
 };
@@ -43,7 +52,6 @@ const priorityMap: Record<Priority, number> = {
   [Priority.High]: 3,
 };
 
-// Supabase kompatibilis TaskDetails
 export const TaskDetails: FC<Props> = ({
   priority = Priority.Low,
   description = "",
@@ -55,6 +63,7 @@ export const TaskDetails: FC<Props> = ({
 }) => {
   const [desc, setDesc] = useState<string>(description);
   const [date, setDate] = useState<string>(deadline);
+  const [showPicker, setShowPicker] = useState(false);
 
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
@@ -62,6 +71,7 @@ export const TaskDetails: FC<Props> = ({
   const [customType, setCustomType] = useState<string>(
     taskType !== "home" && taskType !== "work" ? taskType : "",
   );
+
   const finalType = type === "other" ? customType : type;
 
   const handleSave = () => {
@@ -74,9 +84,26 @@ export const TaskDetails: FC<Props> = ({
     });
   };
 
+  const openDatePicker = () => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value: date ? new Date(date) : new Date(),
+        mode: "date",
+        onChange: (event, selectedDate) => {
+          if (selectedDate) {
+            const formatted = selectedDate.toISOString().split("T")[0];
+            setDate(formatted);
+            onChange?.({ deadline: formatted });
+          }
+        },
+      });
+    } else {
+      setShowPicker(true);
+    }
+  };
+
   return (
     <View className="mt-2 space-y-3">
-      {/* Description input */}
       <TextInput
         className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
         placeholder="Description..."
@@ -88,18 +115,51 @@ export const TaskDetails: FC<Props> = ({
         multiline
       />
 
-      {/* Deadline input */}
-      <TextInput
-        className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
-        placeholder="Deadline (YYYY-MM-DD)"
-        value={date}
-        onChangeText={(text) => {
-          setDate(text);
-          onChange?.({ deadline: text });
-        }}
-      />
+      {Platform.OS === "web" ? (
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => {
+            const val = e.target.value;
+            setDate(val);
+            onChange?.({ deadline: val });
+          }}
+          style={{
+            padding: 12,
+            borderRadius: 12,
+            border: "1px solid #ccc",
+            fontSize: 14,
+          }}
+        />
+      ) : (
+        <>
+          <TouchableOpacity
+            onPress={openDatePicker}
+            className="border border-gray-300 rounded-xl p-3 bg-white"
+          >
+            <Text className="text-sm text-gray-800">
+              {date ? date : "Select deadline"}
+            </Text>
+          </TouchableOpacity>
 
-      {/* Task type selector */}
+          {Platform.OS === "ios" && showPicker && (
+            <DateTimePicker
+              value={date ? new Date(date) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowPicker(false);
+                if (selectedDate) {
+                  const formatted = selectedDate.toISOString().split("T")[0];
+                  setDate(formatted);
+                  onChange?.({ deadline: formatted });
+                }
+              }}
+            />
+          )}
+        </>
+      )}
+
       <View className="flex-row space-x-2">
         {["home", "work", "other"].map((t) => (
           <TouchableOpacity
@@ -125,7 +185,6 @@ export const TaskDetails: FC<Props> = ({
         ))}
       </View>
 
-      {/* Custom task type input */}
       {type === "other" && (
         <TextInput
           className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
@@ -138,13 +197,11 @@ export const TaskDetails: FC<Props> = ({
         />
       )}
 
-      {/* Subtasks section */}
       <SubtaskList
         subtasks={subtasks}
         onChangeSubtasks={(updated) => onChange?.({ subtasks: updated })}
       />
 
-      {/* Save button */}
       <TouchableOpacity
         onPress={handleSave}
         className="bg-blue-500 rounded-xl p-3 mt-3 items-center"
