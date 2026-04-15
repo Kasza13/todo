@@ -205,21 +205,24 @@ export const TaskDetails: FC<Props> = ({
         <Text className="text-xs text-black uppercase tracking-wider mb-1">
           Type
         </Text>
+
         <View className="flex-row space-x-2">
           {["home", "work", "other"].map((t) => (
             <TouchableOpacity
               key={t}
               onPress={() => {
                 setType(t as TaskType);
-                onChange?.({ taskType: t as TaskType });
+                onChange?.({
+                  taskType: t === "other" ? customType : t,
+                });
               }}
               className={`px-3 py-2 rounded-xl border ${
                 type === t
-                  ? t === "other"
-                    ? "bg-purple-400 border-purple-400"
-                    : t === "home"
-                      ? "bg-green-400 border-green-400"
-                      : "bg-yellow-400 border-yellow-400"
+                  ? t === "home"
+                    ? "bg-green-400 border-green-400"
+                    : t === "work"
+                      ? "bg-yellow-400 border-yellow-400"
+                      : "bg-purple-400 border-purple-400"
                   : "bg-gray-200 border-gray-200"
               }`}
             >
@@ -229,19 +232,19 @@ export const TaskDetails: FC<Props> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </View>
 
-      {type === "other" && (
-        <TextInput
-          className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
-          placeholder="Enter custom type"
-          value={customType}
-          onChangeText={(text) => {
-            setCustomType(text);
-            onChange?.({ taskType: text });
-          }}
-        />
-      )}
+        {type === "other" && (
+          <TextInput
+            className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
+            placeholder="Enter custom type"
+            value={customType}
+            onChangeText={(text) => {
+              setCustomType(text);
+              onChange?.({ taskType: text });
+            }}
+          />
+        )}
+      </View>
 
       {/* SAVE BUTTON */}
       <TouchableOpacity

@@ -47,19 +47,6 @@ const priorityToNumber = (p?: Priority | null) => {
   }
 };
 
-const numberToPriority = (n?: number | null): Priority => {
-  switch (n) {
-    case 1:
-      return Priority.Low;
-    case 2:
-      return Priority.Medium;
-    case 3:
-      return Priority.High;
-    default:
-      return Priority.Low;
-  }
-};
-
 const sortTasks = (a: Task, b: Task) => {
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
@@ -77,7 +64,6 @@ export default function HomeScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [taskText, setTaskText] = useState("");
-
   const [showToast, setShowToast] = useState(false);
 
   const showGlobalToast = () => {
@@ -93,10 +79,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const loadTasks = async () => {
       const { data, error } = await supabase.from("todos").select("*");
-      if (error) {
-        console.error(error);
-        return;
-      }
+      if (error) return console.error(error);
       if (data) setTasks(data as Task[]);
     };
 
@@ -116,10 +99,7 @@ export default function HomeScreen() {
       ])
       .select();
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+    if (error) return console.error(error);
 
     if (data) {
       setTasks((prev) => [...prev, ...(data as Task[])]);
@@ -192,7 +172,7 @@ export default function HomeScreen() {
         />
       }
     >
-      {/*  GLOBAL TOP TOAST */}
+      {/* TOAST */}
       {showToast && (
         <View className="absolute top-10 left-0 right-0 items-center z-50">
           <View className="bg-green-500 px-4 py-2 rounded shadow">
@@ -201,66 +181,87 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <ThemedView className="flex-row items-center gap-2 mb-4">
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
+      {/* HEADER */}
+      <View className="mb-6">
+        <ThemedView className="flex-row items-center gap-2 mb-3">
+          <ThemedText type="title">Welcome!</ThemedText>
+          <HelloWave />
+        </ThemedView>
 
-      <ThemedView className="gap-2 mb-4">
-        <ThemedText type="subtitle">Username</ThemedText>
-        <ThemedText>{profile?.username}</ThemedText>
+        <View className="bg-white/80 dark:bg-black/20 p-4 rounded-2xl border border-gray-200">
+          <ThemedText type="subtitle" className="mb-2">
+            Account
+          </ThemedText>
 
-        <ThemedText type="subtitle">Full name</ThemedText>
-        <ThemedText>{profile?.full_name}</ThemedText>
-      </ThemedView>
+          <ThemedText>Username: {profile?.username}</ThemedText>
+          <ThemedText>Full name: {profile?.full_name}</ThemedText>
+        </View>
 
-      <Pressable
-        className="self-end bg-red-500 px-4 py-2 rounded-lg mb-4"
-        onPress={logout}
-      >
-        <ThemedText lightColor="#fff">Logout</ThemedText>
-      </Pressable>
+        <Pressable
+          className="self-end mt-3 bg-red-500 px-4 py-2 rounded-lg"
+          onPress={logout}
+        >
+          <ThemedText lightColor="#fff">Logout</ThemedText>
+        </Pressable>
+      </View>
 
-      <TaskInput
-        taskText={taskText}
-        setTaskText={setTaskText}
-        addTask={addTask}
-      />
+      {/* ADD TASK */}
+      <View className="mb-6">
+        <ThemedText type="subtitle" className="mb-2">
+          Add new task
+        </ThemedText>
 
-      <ThemedText type="subtitle" className="mb-2">
-        Search Tasks
-      </ThemedText>
+        <TaskInput
+          taskText={taskText}
+          setTaskText={setTaskText}
+          addTask={addTask}
+        />
+      </View>
 
-      <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
+      {/* SEARCH */}
+      <View className="mb-6">
+        <ThemedText type="subtitle" className="mb-2">
+          Search tasks
+        </ThemedText>
 
-      <ThemedText type="subtitle" className="mt-4 mb-2">
-        Task List
-      </ThemedText>
+        <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
+      </View>
 
-      <FlatList
-        data={displayedTasks}
-        keyExtractor={(item) => String(item.id)}
-        scrollEnabled={false}
-        ItemSeparatorComponent={() => <View className="h-3" />}
-        renderItem={({ item }) => (
-          <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-            <TaskItem
-              task={item}
-              isExpanded={expandedId === item.id}
-              onToggleExpand={(id) =>
-                setExpandedId(expandedId === id ? null : id)
-              }
-              toggleCompleted={toggleCompleted}
-              openDeleteModal={openDeleteModal}
-              onChangeTask={onChangeTask}
-              showFinishedLabel={
-                finishedTasks.findIndex((t) => t.id === item.id) === 0
-              }
-            />
-          </View>
-        )}
-      />
+      {/* TASK LIST */}
+      <View>
+        <View className="flex-row items-center justify-between mb-3">
+          <ThemedText type="subtitle">Tasks</ThemedText>
+          <ThemedText>
+            {finishedTasks.length} / {tasks.length} done
+          </ThemedText>
+        </View>
 
+        <FlatList
+          data={displayedTasks}
+          keyExtractor={(item) => String(item.id)}
+          scrollEnabled={false}
+          ItemSeparatorComponent={() => <View className="h-3" />}
+          renderItem={({ item }) => (
+            <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+              <TaskItem
+                task={item}
+                isExpanded={expandedId === item.id}
+                onToggleExpand={(id) =>
+                  setExpandedId(expandedId === id ? null : id)
+                }
+                toggleCompleted={toggleCompleted}
+                openDeleteModal={openDeleteModal}
+                onChangeTask={onChangeTask}
+                showFinishedLabel={
+                  finishedTasks.findIndex((t) => t.id === item.id) === 0
+                }
+              />
+            </View>
+          )}
+        />
+      </View>
+
+      {/* DELETE MODAL */}
       <DeleteModal
         visible={modalVisible}
         onCancel={() => setModalVisible(false)}
