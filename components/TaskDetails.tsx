@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 import { Priority } from "../types/Priority";
-import { SubtaskList } from "./SubtaskList";
 
 export type TaskType = "home" | "work" | "other" | string;
 
@@ -104,85 +103,132 @@ export const TaskDetails: FC<Props> = ({
 
   return (
     <View className="mt-2 space-y-3">
-      <TextInput
-        className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
-        placeholder="Description..."
-        value={desc}
-        onChangeText={(text) => {
-          setDesc(text);
-          onChange?.({ description: text });
-        }}
-        multiline
-      />
-
-      {Platform.OS === "web" ? (
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => {
-            const val = e.target.value;
-            setDate(val);
-            onChange?.({ deadline: val });
+      {/* DESCRIPTION */}
+      <View>
+        <Text className="text-xs text-black uppercase tracking-wider mb-1">
+          Description
+        </Text>
+        <TextInput
+          className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
+          placeholder="Description..."
+          value={desc}
+          onChangeText={(text) => {
+            setDesc(text);
+            onChange?.({ description: text });
           }}
-          style={{
-            padding: 12,
-            borderRadius: 12,
-            border: "1px solid #ccc",
-            fontSize: 14,
-          }}
+          multiline
         />
-      ) : (
-        <>
-          <TouchableOpacity
-            onPress={openDatePicker}
-            className="border border-gray-300 rounded-xl p-3 bg-white"
-          >
-            <Text className="text-sm text-gray-800">
-              {date ? date : "Select deadline"}
-            </Text>
-          </TouchableOpacity>
+      </View>
 
-          {Platform.OS === "ios" && showPicker && (
-            <DateTimePicker
-              value={date ? new Date(date) : new Date()}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowPicker(false);
-                if (selectedDate) {
-                  const formatted = selectedDate.toISOString().split("T")[0];
-                  setDate(formatted);
-                  onChange?.({ deadline: formatted });
-                }
-              }}
-            />
-          )}
-        </>
-      )}
+      {/* DEADLINE */}
+      <View>
+        <Text className="text-xs text-black uppercase tracking-wider mb-1">
+          Deadline
+        </Text>
 
-      <View className="flex-row space-x-2">
-        {["home", "work", "other"].map((t) => (
-          <TouchableOpacity
-            key={t}
-            onPress={() => {
-              setType(t as TaskType);
-              onChange?.({ taskType: t as TaskType });
+        {Platform.OS === "web" ? (
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => {
+              const val = e.target.value;
+              setDate(val);
+              onChange?.({ deadline: val });
             }}
-            className={`px-3 py-2 rounded-xl border ${
-              type === t
-                ? t === "other"
-                  ? "bg-purple-400 border-purple-400"
-                  : t === "home"
+            style={{
+              padding: 12,
+              borderRadius: 12,
+              border: "1px solid #ccc",
+              fontSize: 14,
+            }}
+          />
+        ) : (
+          <>
+            <TouchableOpacity
+              onPress={openDatePicker}
+              className="border border-gray-300 rounded-xl p-3 bg-white"
+            >
+              <Text className="text-sm text-gray-800">
+                {date ? date : "Select deadline"}
+              </Text>
+            </TouchableOpacity>
+
+            {Platform.OS === "ios" && showPicker && (
+              <DateTimePicker
+                value={date ? new Date(date) : new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowPicker(false);
+                  if (selectedDate) {
+                    const formatted = selectedDate.toISOString().split("T")[0];
+                    setDate(formatted);
+                    onChange?.({ deadline: formatted });
+                  }
+                }}
+              />
+            )}
+          </>
+        )}
+      </View>
+
+      {/* PRIORITY */}
+      <View>
+        <Text className="text-xs text-black uppercase tracking-wider mb-1">
+          Priority
+        </Text>
+        <View className="flex-row space-x-2">
+          {[Priority.Low, Priority.Medium, Priority.High].map((p) => (
+            <TouchableOpacity
+              key={p}
+              onPress={() => onChange?.({ priority: p })}
+              className={`px-3 py-2 rounded-xl border ${
+                priority === p
+                  ? p === Priority.Low
                     ? "bg-green-400 border-green-400"
-                    : "bg-yellow-400 border-yellow-400"
-                : "bg-gray-200 border-gray-200"
-            }`}
-          >
-            <Text className="text-sm font-mono text-center">
-              {t.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
+                    : p === Priority.Medium
+                      ? "bg-yellow-400 border-yellow-400"
+                      : "bg-red-400 border-red-400"
+                  : "bg-gray-200 border-gray-200"
+              }`}
+            >
+              <Text className="text-sm font-mono text-center">
+                {p.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* TYPE */}
+      <View>
+        <Text className="text-xs text-black uppercase tracking-wider mb-1">
+          Type
+        </Text>
+        <View className="flex-row space-x-2">
+          {["home", "work", "other"].map((t) => (
+            <TouchableOpacity
+              key={t}
+              onPress={() => {
+                setType(t as TaskType);
+                onChange?.({ taskType: t as TaskType });
+              }}
+              className={`px-3 py-2 rounded-xl border ${
+                type === t
+                  ? t === "other"
+                    ? "bg-purple-400 border-purple-400"
+                    : t === "home"
+                      ? "bg-green-400 border-green-400"
+                      : "bg-yellow-400 border-yellow-400"
+                  : "bg-gray-200 border-gray-200"
+              }`}
+            >
+              <Text className="text-sm font-mono text-center">
+                {t.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {type === "other" && (
@@ -197,11 +243,7 @@ export const TaskDetails: FC<Props> = ({
         />
       )}
 
-      <SubtaskList
-        subtasks={subtasks}
-        onChangeSubtasks={(updated) => onChange?.({ subtasks: updated })}
-      />
-
+      {/* SAVE BUTTON */}
       <TouchableOpacity
         onPress={handleSave}
         className="bg-blue-500 rounded-xl p-3 mt-3 items-center"

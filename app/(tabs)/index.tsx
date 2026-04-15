@@ -34,6 +34,32 @@ export enum Priority {
   High = "high",
 }
 
+const priorityToNumber = (p?: Priority | null) => {
+  switch (p) {
+    case Priority.Low:
+      return 1;
+    case Priority.Medium:
+      return 2;
+    case Priority.High:
+      return 3;
+    default:
+      return null;
+  }
+};
+
+const numberToPriority = (n?: number | null): Priority => {
+  switch (n) {
+    case 1:
+      return Priority.Low;
+    case 2:
+      return Priority.Medium;
+    case 3:
+      return Priority.High;
+    default:
+      return Priority.Low;
+  }
+};
+
 const sortTasks = (a: Task, b: Task) => {
   if (!a.deadline) return 1;
   if (!b.deadline) return -1;
@@ -133,7 +159,13 @@ export default function HomeScreen() {
   };
 
   const onChangeTask = async (id: string, updatedTask: Partial<Task>) => {
-    await supabase.from("todos").update(updatedTask).eq("id", id);
+    const dbUpdate: any = { ...updatedTask };
+
+    if (updatedTask.priority !== undefined) {
+      dbUpdate.priority = priorityToNumber(updatedTask.priority);
+    }
+
+    await supabase.from("todos").update(dbUpdate).eq("id", id);
 
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updatedTask } : t)),
