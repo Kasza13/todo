@@ -63,6 +63,7 @@ export const TaskDetails: FC<Props> = ({
   const [desc, setDesc] = useState<string>(description);
   const [date, setDate] = useState<string>(deadline);
   const [showPicker, setShowPicker] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
@@ -81,6 +82,12 @@ export const TaskDetails: FC<Props> = ({
       priority: priorityMap[priority],
       subtasks,
     });
+
+    setShowToast(true);
+
+    setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
   };
 
   const openDatePicker = () => {
@@ -245,6 +252,14 @@ export const TaskDetails: FC<Props> = ({
           />
         )}
       </View>
+      {/* TOAST */}
+      {showToast && (
+        <View className="absolute top-10 left-0 right-0 items-center z-50">
+          <View className="bg-green-500 px-4 py-2 rounded shadow">
+            <Text className="text-white font-bold">Task saved!</Text>
+          </View>
+        </View>
+      )}
 
       {/* SAVE BUTTON */}
       <TouchableOpacity
