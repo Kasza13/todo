@@ -25,24 +25,8 @@ type Props = {
   deadline?: string;
   subtasks?: Subtask[];
   taskType?: TaskType;
-
-  onChange?: (
-    data: Partial<{
-      priority: Priority;
-      description: string;
-      deadline: string;
-      subtasks: Subtask[];
-      taskType: TaskType;
-    }>,
-  ) => void;
-
-  onSave?: (task: {
-    description: string | null;
-    deadline: string | null;
-    type: string | null;
-    priority: number;
-    subtasks: Subtask[];
-  }) => void;
+  onChange?: (data: any) => void;
+  onSave?: (task: any) => void;
 };
 
 const priorityMap: Record<Priority, number> = {
@@ -60,15 +44,15 @@ export const TaskDetails: FC<Props> = ({
   onChange,
   onSave,
 }) => {
-  const [desc, setDesc] = useState<string>(description);
-  const [date, setDate] = useState<string>(deadline);
+  const [desc, setDesc] = useState(description);
+  const [date, setDate] = useState(deadline);
   const [showPicker, setShowPicker] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
   const [type, setType] = useState<TaskType>(
     taskType === "home" || taskType === "work" ? taskType : "other",
   );
-  const [customType, setCustomType] = useState<string>(
+  const [customType, setCustomType] = useState(
     taskType !== "home" && taskType !== "work" ? taskType : "",
   );
 
@@ -84,10 +68,7 @@ export const TaskDetails: FC<Props> = ({
     });
 
     setShowToast(true);
-
-    setTimeout(() => {
-      setShowToast(false);
-    }, 2000);
+    setTimeout(() => setShowToast(false), 2000);
   };
 
   const openDatePicker = () => {
@@ -95,7 +76,7 @@ export const TaskDetails: FC<Props> = ({
       DateTimePickerAndroid.open({
         value: date ? new Date(date) : new Date(),
         mode: "date",
-        onChange: (event, selectedDate) => {
+        onChange: (_, selectedDate) => {
           if (selectedDate) {
             const formatted = selectedDate.toISOString().split("T")[0];
             setDate(formatted);
@@ -109,27 +90,26 @@ export const TaskDetails: FC<Props> = ({
   };
 
   return (
-    <View className="mt-2 space-y-3">
+    <View className="mt-3 bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm">
       {/* DESCRIPTION */}
-      <View>
-        <Text className="text-xs text-black uppercase tracking-wider mb-1">
-          Description
-        </Text>
+      <View className="mb-5">
+        <Text className="text-xs text-gray-400 mb-2">Description</Text>
         <TextInput
-          className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800"
-          placeholder="Description..."
+          placeholder="Write something..."
+          placeholderTextColor="#9CA3AF"
           value={desc}
           onChangeText={(text) => {
             setDesc(text);
             onChange?.({ description: text });
           }}
           multiline
+          className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3 text-base text-gray-900 dark:text-white"
         />
       </View>
 
       {/* DEADLINE */}
-      <View>
-        <Text className="text-xs text-black uppercase tracking-wider mb-1">
+      <View className="mb-5">
+        <Text className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
           Deadline
         </Text>
 
@@ -143,29 +123,32 @@ export const TaskDetails: FC<Props> = ({
               onChange?.({ deadline: val });
             }}
             style={{
-              padding: 12,
-              borderRadius: 12,
-              border: "1px solid #ccc",
-              fontSize: 14,
+              padding: 14,
+              borderRadius: 16,
+              border: "none",
+              backgroundColor: "#f3f4f6",
+              width: "100%",
             }}
           />
         ) : (
           <>
             <TouchableOpacity
               onPress={openDatePicker}
-              className="border border-gray-300 rounded-xl p-3 bg-white"
+              className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-4 shadow-sm flex-row items-center justify-between"
             >
-              <Text className="text-sm text-gray-800">
-                {date ? date : "Select deadline"}
+              <Text className="text-gray-900 dark:text-white">
+                {date ? date : "No deadline set"}
               </Text>
+
+              <Text className="text-gray-400">📅</Text>
             </TouchableOpacity>
 
             {Platform.OS === "ios" && showPicker && (
               <DateTimePicker
                 value={date ? new Date(date) : new Date()}
                 mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
+                display="compact"
+                onChange={(_, selectedDate) => {
                   setShowPicker(false);
                   if (selectedDate) {
                     const formatted = selectedDate.toISOString().split("T")[0];
@@ -180,27 +163,31 @@ export const TaskDetails: FC<Props> = ({
       </View>
 
       {/* PRIORITY */}
-      <View>
-        <Text className="text-xs text-black uppercase tracking-wider mb-1">
-          Priority
-        </Text>
-        <View className="flex-row space-x-2">
+      <View className="mb-5">
+        <Text className="text-xs text-gray-400 mb-2">Priority</Text>
+        <View className="flex-row gap-2">
           {[Priority.Low, Priority.Medium, Priority.High].map((p) => (
             <TouchableOpacity
               key={p}
               onPress={() => onChange?.({ priority: p })}
-              className={`px-3 py-2 rounded-xl border ${
+              className={`px-4 py-2 rounded-full ${
                 priority === p
                   ? p === Priority.Low
-                    ? "bg-green-400 border-green-400"
+                    ? "bg-green-500"
                     : p === Priority.Medium
-                      ? "bg-yellow-400 border-yellow-400"
-                      : "bg-red-400 border-red-400"
-                  : "bg-gray-200 border-gray-200"
+                      ? "bg-yellow-500"
+                      : "bg-red-500"
+                  : "bg-gray-200 dark:bg-gray-700"
               }`}
             >
-              <Text className="text-sm font-mono text-center">
-                {p.toUpperCase()}
+              <Text
+                className={`text-sm ${
+                  priority === p
+                    ? "text-white"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {p}
               </Text>
             </TouchableOpacity>
           ))}
@@ -208,12 +195,10 @@ export const TaskDetails: FC<Props> = ({
       </View>
 
       {/* TYPE */}
-      <View>
-        <Text className="text-xs text-black uppercase tracking-wider mb-1">
-          Type
-        </Text>
+      <View className="mb-5">
+        <Text className="text-xs text-gray-400 mb-2">Type</Text>
 
-        <View className="flex-row space-x-2">
+        <View className="flex-row gap-2">
           {["home", "work", "other"].map((t) => (
             <TouchableOpacity
               key={t}
@@ -223,18 +208,16 @@ export const TaskDetails: FC<Props> = ({
                   taskType: t === "other" ? customType : t,
                 });
               }}
-              className={`px-3 py-2 rounded-xl border ${
-                type === t
-                  ? t === "home"
-                    ? "bg-green-400 border-green-400"
-                    : t === "work"
-                      ? "bg-yellow-400 border-yellow-400"
-                      : "bg-purple-400 border-purple-400"
-                  : "bg-gray-200 border-gray-200"
+              className={`px-4 py-2 rounded-full ${
+                type === t ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
               }`}
             >
-              <Text className="text-sm font-mono text-center">
-                {t.toUpperCase()}
+              <Text
+                className={`text-sm ${
+                  type === t ? "text-white" : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {t}
               </Text>
             </TouchableOpacity>
           ))}
@@ -242,21 +225,23 @@ export const TaskDetails: FC<Props> = ({
 
         {type === "other" && (
           <TextInput
-            className="border border-gray-300 rounded-xl p-3 text-sm bg-white text-gray-800 mt-2"
-            placeholder="Enter custom type"
+            placeholder="Custom type..."
+            placeholderTextColor="#9CA3AF"
             value={customType}
             onChangeText={(text) => {
               setCustomType(text);
               onChange?.({ taskType: text });
             }}
+            className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3 mt-3 text-gray-900 dark:text-white"
           />
         )}
       </View>
+
       {/* TOAST */}
       {showToast && (
-        <View className="absolute top-10 left-0 right-0 items-center z-50">
-          <View className="bg-green-500 px-4 py-2 rounded shadow">
-            <Text className="text-white font-bold">Task saved!</Text>
+        <View className="absolute top-5 left-5 right-5">
+          <View className="bg-black/80 px-4 py-3 rounded-2xl">
+            <Text className="text-white text-center">Saved</Text>
           </View>
         </View>
       )}
@@ -264,9 +249,11 @@ export const TaskDetails: FC<Props> = ({
       {/* SAVE BUTTON */}
       <TouchableOpacity
         onPress={handleSave}
-        className="bg-blue-500 rounded-xl p-3 mt-3 items-center"
+        className="bg-green-600 rounded-2xl py-4 items-center mt-2 active:opacity-80"
       >
-        <Text className="text-white font-bold text-sm">SAVE TASK</Text>
+        <Text className="text-white font-semibold tracking-wide">
+          Save Task
+        </Text>
       </TouchableOpacity>
     </View>
   );

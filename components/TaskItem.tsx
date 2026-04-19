@@ -42,67 +42,82 @@ export const TaskItem: FC<Props> = ({
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState(task.title);
 
-  const getPriorityColor = () => {
-    switch (task.priority) {
-      case Priority.High:
-        return "text-red-500";
-      case Priority.Medium:
-        return "text-yellow-500";
-      default:
-        return "text-gray-800";
-    }
-  };
-
   const handleRename = () => {
     onChangeTask(task.id, { title: newTitle.trim() || task.title });
     setRenameModalVisible(false);
   };
 
+  const priorityDot =
+    task.priority === Priority.High
+      ? "bg-red-500"
+      : task.priority === Priority.Medium
+        ? "bg-yellow-500"
+        : "bg-green-500";
+
   return (
-    <View className="mb-3">
+    <View className="mb-4">
       {showFinishedLabel && (
-        <Text className="mb-2 text-gray-400 text-xs uppercase tracking-widest">
+        <Text className="mb-2 text-gray-400 text-xs tracking-widest uppercase">
           Finished
         </Text>
       )}
 
-      <View className="bg-white rounded-xl border border-gray-200 p-3">
-        <View className="flex-row justify-between items-center">
+      {/* CARD */}
+      <View className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm">
+        {/* HEADER */}
+        <View className="flex-row items-center justify-between">
+          {/* LEFT */}
           <TouchableOpacity
             className="flex-row items-center flex-1"
             onPress={() => onToggleExpand(task.id)}
           >
-            <Text className="mr-2 text-gray-500">{isExpanded ? "▲" : "▼"}</Text>
+            <View className={`w-2 h-2 rounded-full mr-3 ${priorityDot}`} />
 
             <Text
-              className={`${getPriorityColor()} text-base font-medium ${
-                task.completed ? "line-through text-gray-400" : ""
+              className={`text-base font-medium flex-1 ${
+                task.completed
+                  ? "text-gray-400 line-through"
+                  : "text-gray-900 dark:text-white"
               }`}
             >
               {task.title}
-              {task.priority === Priority.High ? " ★" : ""}
             </Text>
+
+            <Text className="text-gray-400 ml-2">{isExpanded ? "▾" : "▸"}</Text>
           </TouchableOpacity>
 
-          <View className="flex-row items-center space-x-3">
-            <TouchableOpacity onPress={() => toggleCompleted(task.id)}>
-              <Text className="text-sm text-gray-500">
+          {/* ACTIONS */}
+          <View className="flex-row gap-2 ml-3">
+            <TouchableOpacity
+              onPress={() => toggleCompleted(task.id)}
+              className={`px-3 py-2 rounded-full ${
+                task.completed ? "bg-gray-200 dark:bg-gray-700" : "bg-green-500"
+              }`}
+            >
+              <Text className="text-xs text-white">
                 {task.completed ? "Done" : "Active"}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setRenameModalVisible(true)}>
-              <Text className="text-sm text-blue-500">Rename</Text>
+            <TouchableOpacity
+              onPress={() => setRenameModalVisible(true)}
+              className="px-3 py-2 rounded-full bg-blue-500"
+            >
+              <Text className="text-xs text-white">Rename</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => openDeleteModal(task.id)}>
-              <Text className="text-sm text-red-500">Delete</Text>
+            <TouchableOpacity
+              onPress={() => openDeleteModal(task.id)}
+              className="px-3 py-2 rounded-full bg-red-500"
+            >
+              <Text className="text-xs text-white">Delete</Text>
             </TouchableOpacity>
           </View>
         </View>
 
+        {/* EXPANDED */}
         {isExpanded && (
-          <View className="mt-3 border-t border-gray-200 pt-3">
+          <View className="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4">
             <TaskDetails
               priority={task.priority}
               description={task.description}
@@ -118,23 +133,32 @@ export const TaskItem: FC<Props> = ({
       {/* RENAME MODAL */}
       <Modal visible={renameModalVisible} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white w-80 p-4 rounded-xl">
-            <Text className="text-lg font-bold mb-3">Rename task</Text>
+          <View className="bg-white dark:bg-gray-800 w-80 p-5 rounded-3xl">
+            <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              Rename task
+            </Text>
 
             <TextInput
               value={newTitle}
               onChangeText={setNewTitle}
-              className="border border-gray-300 rounded-xl p-3 mb-3"
               placeholder="New title..."
+              placeholderTextColor="#9CA3AF"
+              className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3 mb-4 text-gray-900 dark:text-white"
             />
 
-            <View className="flex-row justify-end space-x-3">
-              <TouchableOpacity onPress={() => setRenameModalVisible(false)}>
-                <Text className="text-gray-500">Cancel</Text>
+            <View className="flex-row justify-end gap-3">
+              <TouchableOpacity
+                onPress={() => setRenameModalVisible(false)}
+                className="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-700"
+              >
+                <Text className="text-gray-700 dark:text-gray-200">Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={handleRename}>
-                <Text className="text-blue-500 font-bold">Save</Text>
+              <TouchableOpacity
+                onPress={handleRename}
+                className="px-4 py-2 rounded-xl bg-green-600"
+              >
+                <Text className="text-white font-semibold">Save</Text>
               </TouchableOpacity>
             </View>
           </View>

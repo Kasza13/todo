@@ -9,15 +9,19 @@ type Props = {
 
 export const TaskInput = ({ taskText, setTaskText, addTask }: Props) => {
   return (
-    <View className="flex-row items-center gap-2 mb-4">
+    <View className="flex-row items-center bg-white dark:bg-gray-800 p-2 rounded-3xl shadow-sm">
       <TextInput
         value={taskText}
         onChangeText={setTaskText}
         placeholder="Add new task..."
-        className="flex-1 border border-gray-300 rounded-xl px-3 py-2 bg-white"
+        placeholderTextColor="#9CA3AF"
+        className="flex-1 px-4 py-3 text-base text-gray-900 dark:text-white"
       />
 
-      <Pressable onPress={addTask} className="bg-blue-500 px-4 py-2 rounded-xl">
+      <Pressable
+        onPress={addTask}
+        className="bg-green-600 px-5 py-3 rounded-2xl active:opacity-80"
+      >
         <Text className="text-white font-semibold">Add</Text>
       </Pressable>
     </View>

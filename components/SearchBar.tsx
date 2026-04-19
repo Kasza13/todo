@@ -1,33 +1,26 @@
-// Import React and the required hooks
 import React, { useEffect, useState } from "react";
-// Import React Native UI components
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
-// Import Priority and Task types from the project
 import { Priority } from "@/types/Priority";
 import { Task } from "../app/(tabs)/index";
 
-// Props type definition for the SearchBar component
 type Props = {
-  tasks: Task[]; // Array of tasks to filter
-  onFilter: (filtered: Task[]) => void; // Callback to return the filtered list
-  onShowDetails?: (show: boolean) => void; // Optional callback for the detailed filters state
+  tasks: Task[];
+  onFilter: (filtered: Task[]) => void;
+  onShowDetails?: (show: boolean) => void;
 };
 
-// SearchBar functional component
 export const SearchBar: React.FC<Props> = ({
-  tasks, // All tasks
-  onFilter, // Callback for the filtered list
-  onShowDetails, // Callback to show/hide details
+  tasks,
+  onFilter,
+  onShowDetails,
 }) => {
-  // Filter states
-  const [textFilter, setTextFilter] = useState(""); // Search input text
-  const [categoryFilter, setCategoryFilter] = useState<string>("all"); // Category filter
-  const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all"); // Priority filter
-  const [deadlineOnly, setDeadlineOnly] = useState(false); // Deadline-only filter state
-  const [detailsFilter, setDetailsFilter] = useState(false); // Detailed filter button state
+  const [textFilter, setTextFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all");
+  const [deadlineOnly, setDeadlineOnly] = useState(false);
+  const [detailsFilter, setDetailsFilter] = useState(false);
 
-  // useEffect to handle filtering and callbacks
   useEffect(() => {
     const filtered = tasks.filter((task) => {
       const textMatch = (task.title ?? "")
@@ -61,49 +54,58 @@ export const SearchBar: React.FC<Props> = ({
   ]);
 
   return (
-    <View className="mb-4 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+    <View className="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm">
       {/* SEARCH INPUT */}
       <TextInput
         placeholder="Search tasks..."
+        placeholderTextColor="#9CA3AF"
         value={textFilter}
         onChangeText={setTextFilter}
-        className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 mb-2 text-sm"
+        className="bg-gray-100 dark:bg-gray-700 rounded-xl px-4 py-3 text-base mb-3 text-gray-900 dark:text-white"
       />
 
-      {/* DETAILS FILTER BUTTON */}
+      {/* DETAILS BUTTON */}
       <TouchableOpacity
-        className={`px-4 py-2 rounded-xl border self-start mb-3 ${
-          detailsFilter
-            ? "bg-blue-600 border-blue-600"
-            : "bg-white border-gray-300"
-        }`}
         onPress={() => setDetailsFilter(!detailsFilter)}
+        className={`self-start px-4 py-2 rounded-full ${
+          detailsFilter
+            ? "bg-gray-900 dark:bg-white"
+            : "bg-gray-200 dark:bg-gray-700"
+        }`}
       >
         <Text
-          className={`text-sm ${detailsFilter ? "text-white" : "text-gray-700"}`}
+          className={`text-sm font-medium ${
+            detailsFilter
+              ? "text-white dark:text-black"
+              : "text-gray-700 dark:text-gray-300"
+          }`}
         >
-          Filter Details
+          Filters
         </Text>
       </TouchableOpacity>
 
-      {/* Other filters appear only when Filter Details is enabled */}
+      {/* FILTERS */}
       {detailsFilter && (
-        <>
-          {/* CATEGORY FILTER */}
-          <Text className="text-xs text-gray-500 mb-1">Category</Text>
-          <View className="flex-row flex-wrap gap-2 mb-3">
+        <View className="mt-4">
+          {/* CATEGORY */}
+          <Text className="text-xs text-gray-400 mb-2">Category</Text>
+          <View className="flex-row flex-wrap gap-2 mb-4">
             {["all", "work", "home", "other"].map((cat) => (
               <TouchableOpacity
                 key={cat}
-                className={`px-3 py-2 rounded-xl border ${
-                  categoryFilter === cat
-                    ? "bg-blue-500 border-blue-500"
-                    : "bg-white border-gray-300"
-                }`}
                 onPress={() => setCategoryFilter(cat)}
+                className={`px-4 py-2 rounded-full ${
+                  categoryFilter === cat
+                    ? "bg-blue-500"
+                    : "bg-gray-200 dark:bg-gray-700"
+                }`}
               >
                 <Text
-                  className={`text-sm ${categoryFilter === cat ? "text-white" : "text-gray-700"}`}
+                  className={`text-sm ${
+                    categoryFilter === cat
+                      ? "text-white"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
                 >
                   {cat === "all"
                     ? "All"
@@ -113,23 +115,27 @@ export const SearchBar: React.FC<Props> = ({
             ))}
           </View>
 
-          {/* PRIORITY FILTER */}
-          <Text className="text-xs text-gray-500 mb-1">Priority</Text>
-          <View className="flex-row flex-wrap gap-2 mb-3">
+          {/* PRIORITY */}
+          <Text className="text-xs text-gray-400 mb-2">Priority</Text>
+          <View className="flex-row flex-wrap gap-2 mb-4">
             {["all", "low", "medium", "high"].map((p) => (
               <TouchableOpacity
                 key={p}
-                className={`px-3 py-2 rounded-xl border ${
-                  priorityFilter === p
-                    ? "bg-green-500 border-green-500"
-                    : "bg-white border-gray-300"
-                }`}
                 onPress={() =>
                   setPriorityFilter(p === "all" ? "all" : (p as Priority))
                 }
+                className={`px-4 py-2 rounded-full ${
+                  priorityFilter === p
+                    ? "bg-red-500"
+                    : "bg-gray-200 dark:bg-gray-700"
+                }`}
               >
                 <Text
-                  className={`text-sm ${priorityFilter === p ? "text-white" : "text-gray-700"}`}
+                  className={`text-sm ${
+                    priorityFilter === p
+                      ? "text-white"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
                 >
                   {p === "all" ? "All" : p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
@@ -137,22 +143,22 @@ export const SearchBar: React.FC<Props> = ({
             ))}
           </View>
 
-          {/* DEADLINE FILTER */}
+          {/* DEADLINE */}
           <TouchableOpacity
-            className={`px-4 py-2 rounded-xl border self-start ${
-              deadlineOnly
-                ? "bg-purple-500 border-purple-500"
-                : "bg-white border-gray-300"
-            }`}
             onPress={() => setDeadlineOnly(!deadlineOnly)}
+            className={`self-start px-4 py-2 rounded-full ${
+              deadlineOnly ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
+            }`}
           >
             <Text
-              className={`text-sm ${deadlineOnly ? "text-white" : "text-gray-700"}`}
+              className={`text-sm ${
+                deadlineOnly ? "text-white" : "text-gray-700 dark:text-gray-300"
+              }`}
             >
-              {deadlineOnly ? "Deadline only" : "All tasks"}
+              Deadline only
             </Text>
           </TouchableOpacity>
-        </>
+        </View>
       )}
     </View>
   );
