@@ -1,19 +1,14 @@
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { useAuthContext } from "@/hooks/use-auth-context";
+import { supabase } from "@/utils/supabase";
 
 import { DeleteModal } from "@/components/DeleteModal";
 import { SearchBar } from "@/components/SearchBar";
 import { TaskInput } from "@/components/TaskInput";
 import { TaskItem } from "@/components/TaskItem";
-import { supabase } from "@/utils/supabase";
 
 import "@/global.css";
 
@@ -91,12 +86,7 @@ export default function HomeScreen() {
 
     const { data, error } = await supabase
       .from("todos")
-      .insert([
-        {
-          title: taskText,
-          completed: false,
-        },
-      ])
+      .insert([{ title: taskText, completed: false }])
       .select();
 
     if (error) return console.error(error);
@@ -163,110 +153,120 @@ export default function HomeScreen() {
   }, [tasks, filteredTasks]);
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          className="absolute bottom-0 left-0 w-[290px] h-[178px]"
-        />
-      }
-    >
-      {/* TOAST */}
-      {showToast && (
-        <View className="absolute top-10 left-0 right-0 items-center z-50">
-          <View className="bg-green-500 px-4 py-2 rounded shadow">
-            <Text className="text-white font-bold">Task added!</Text>
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="px-5 pt-10 pb-10">
+        {/* TOAST */}
+        {showToast && (
+          <View className="absolute top-16 left-5 right-5 z-50">
+            <View className="bg-black/80 px-5 py-3 rounded-2xl">
+              <Text className="text-white text-center font-medium">
+                Task added
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* TITLE */}
+        <Text className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+          The TODO
+        </Text>
+
+        {/* HEADER */}
+        <View className="mb-8">
+          <View className="flex-row items-center justify-between mb-4">
+            <View>
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                Welcome 👋
+              </Text>
+              <Text className="text-gray-500">{profile?.username}</Text>
+            </View>
+
+            <Pressable
+              onPress={logout}
+              className="bg-red-900 px-4 py-2 rounded-xl shadow-sm active:opacity-80"
+            >
+              <Text className="text-white font-medium">Logout</Text>
+            </Pressable>
+          </View>
+
+          <View className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm">
+            <Text className="text-gray-400 text-sm mb-1">Full name</Text>
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+              {profile?.full_name}
+            </Text>
           </View>
         </View>
-      )}
 
-      {/* HEADER */}
-      <View className="mb-6">
-        <ThemedView className="flex-row items-center gap-2 mb-3">
-          <ThemedText type="title">Welcome!</ThemedText>
-          <HelloWave />
-        </ThemedView>
+        {/* ADD TASK */}
+        <View className="mb-8">
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+            New Task
+          </Text>
 
-        <View className="bg-white/80 dark:bg-black/20 p-4 rounded-2xl border border-gray-200">
-          <ThemedText type="subtitle" className="mb-2">
-            Account
-          </ThemedText>
-
-          <ThemedText>Username: {profile?.username}</ThemedText>
-          <ThemedText>Full name: {profile?.full_name}</ThemedText>
+          <View className="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm">
+            <TaskInput
+              taskText={taskText}
+              setTaskText={setTaskText}
+              addTask={addTask}
+            />
+          </View>
         </View>
 
-        <Pressable
-          className="self-end mt-3 bg-red-500 px-4 py-2 rounded-lg"
-          onPress={logout}
-        >
-          <ThemedText lightColor="#fff">Logout</ThemedText>
-        </Pressable>
-      </View>
+        {/* SEARCH */}
+        <View className="mb-8">
+          <Text className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+            Search
+          </Text>
 
-      {/* ADD TASK */}
-      <View className="mb-6">
-        <ThemedText type="subtitle" className="mb-2">
-          Add new task
-        </ThemedText>
-
-        <TaskInput
-          taskText={taskText}
-          setTaskText={setTaskText}
-          addTask={addTask}
-        />
-      </View>
-
-      {/* SEARCH */}
-      <View className="mb-6">
-        <ThemedText type="subtitle" className="mb-2">
-          Search tasks
-        </ThemedText>
-
-        <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
-      </View>
-
-      {/* TASK LIST */}
-      <View>
-        <View className="flex-row items-center justify-between mb-3">
-          <ThemedText type="subtitle">Tasks</ThemedText>
-          <ThemedText>
-            {finishedTasks.length} / {tasks.length} done
-          </ThemedText>
+          <View className="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm">
+            <SearchBar tasks={tasks} onFilter={setFilteredTasks} />
+          </View>
         </View>
 
-        <FlatList
-          data={displayedTasks}
-          keyExtractor={(item) => String(item.id)}
-          scrollEnabled={false}
-          ItemSeparatorComponent={() => <View className="h-3" />}
-          renderItem={({ item }) => (
-            <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-              <TaskItem
-                task={item}
-                isExpanded={expandedId === item.id}
-                onToggleExpand={(id) =>
-                  setExpandedId(expandedId === id ? null : id)
-                }
-                toggleCompleted={toggleCompleted}
-                openDeleteModal={openDeleteModal}
-                onChangeTask={onChangeTask}
-                showFinishedLabel={
-                  finishedTasks.findIndex((t) => t.id === item.id) === 0
-                }
-              />
-            </View>
-          )}
+        {/* TASK LIST */}
+        <View>
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+              Tasks
+            </Text>
+
+            <Text className="text-gray-500">
+              {finishedTasks.length} / {tasks.length}
+            </Text>
+          </View>
+
+          <FlatList
+            data={displayedTasks}
+            keyExtractor={(item) => String(item.id)}
+            scrollEnabled={false}
+            ItemSeparatorComponent={() => <View className="h-4" />}
+            renderItem={({ item }) => (
+              <View className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm">
+                <TaskItem
+                  task={item}
+                  isExpanded={expandedId === item.id}
+                  onToggleExpand={(id) =>
+                    setExpandedId(expandedId === id ? null : id)
+                  }
+                  toggleCompleted={toggleCompleted}
+                  openDeleteModal={openDeleteModal}
+                  onChangeTask={onChangeTask}
+                  showFinishedLabel={
+                    finishedTasks.findIndex((t) => t.id === item.id) === 0
+                  }
+                />
+              </View>
+            )}
+          />
+        </View>
+
+        {/* DELETE MODAL */}
+        <DeleteModal
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)}
+          onConfirm={confirmDelete}
         />
       </View>
-
-      {/* DELETE MODAL */}
-      <DeleteModal
-        visible={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        onConfirm={confirmDelete}
-      />
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
