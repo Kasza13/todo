@@ -1,24 +1,8 @@
 import { Priority } from "@/types/Priority";
+import { Task } from "@/types/task";
 import { FC, useState } from "react";
 import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { TaskDetails, TaskType } from "./TaskDetails";
-
-export type Subtask = {
-  id: string;
-  text: string;
-  completed: boolean;
-};
-
-export type Task = {
-  id: string;
-  title: string;
-  completed: boolean;
-  priority: Priority;
-  description?: string;
-  deadline?: string;
-  taskType?: TaskType;
-  subtasks?: Subtask[];
-};
+import { TaskDetails } from "./TaskDetails";
 
 type Props = {
   task: Task;

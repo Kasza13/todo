@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 
 import { useAuthContext } from "@/hooks/use-auth-context";
+import { Priority } from "@/types/Priority";
+import { Task } from "@/types/task";
 import { supabase } from "@/utils/supabase";
 
 import { DeleteModal } from "@/components/DeleteModal";
@@ -11,23 +13,6 @@ import { TaskInput } from "@/components/TaskInput";
 import { TaskItem } from "@/components/TaskItem";
 
 import "@/global.css";
-
-export type Task = {
-  id: string;
-  title: string;
-  completed: boolean;
-  priority?: Priority | null;
-  description?: string;
-  deadline?: string;
-  taskType?: string;
-  subtasks?: { id: string; text: string; completed: boolean }[];
-};
-
-export enum Priority {
-  Low = "low",
-  Medium = "medium",
-  High = "high",
-}
 
 const priorityToNumber = (p?: Priority | null) => {
   switch (p) {

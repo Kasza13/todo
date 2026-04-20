@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { Priority } from "@/types/Priority";
-import { Task } from "../app/(tabs)/index";
+import { Task } from "@/types/task";
 
 type Props = {
   tasks: Task[];
