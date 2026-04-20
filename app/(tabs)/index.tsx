@@ -163,7 +163,6 @@ export default function HomeScreen() {
               <Text className="text-2xl font-bold text-gray-900 dark:text-white">
                 Welcome 👋
               </Text>
-              <Text className="text-gray-500">{profile?.username}</Text>
             </View>
 
             <Pressable
@@ -175,9 +174,8 @@ export default function HomeScreen() {
           </View>
 
           <View className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm">
-            <Text className="text-gray-400 text-sm mb-1">Full name</Text>
             <Text className="text-lg font-semibold text-gray-900 dark:text-white">
-              {profile?.full_name}
+              {profile?.username}
             </Text>
           </View>
         </View>
