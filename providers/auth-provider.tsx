@@ -1,4 +1,5 @@
 import { supabase } from "@/utils/supabase";
+import { Session } from "@supabase/supabase-js";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 export type Profile = {
@@ -26,42 +27,37 @@ type Props = {
 
 export default function AuthProvider({ children }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const loadProfile = async (userId: string) => {
-      try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
+    const hydrateProfile = (nextSession: Session | null) => {
+      const user = nextSession?.user;
 
-        if (data) {
-          setProfile({
-            id: data.id,
-            email: data.email,
-            username: data.username,
-            full_name: data.full_name,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to load profile", error);
+      if (!user) {
+        setProfile(null);
+        return;
       }
+
+      const metadata = user.user_metadata ?? {};
+
+      setProfile({
+        id: user.id,
+        email: user.email ?? "",
+        username:
+          metadata.username ??
+          metadata.user_name ??
+          metadata.name ??
+          user.email?.split("@")[0],
+        full_name: metadata.full_name ?? metadata.name,
+      });
     };
 
     supabase.auth
       .getSession()
-      .then(async ({ data }) => {
+      .then(({ data }) => {
         setSession(data.session);
-
-        if (data.session?.user) {
-          await loadProfile(data.session.user.id);
-        } else {
-          setProfile(null);
-        }
-
+        hydrateProfile(data.session);
         setIsReady(true);
       })
       .catch((error) => {
@@ -73,13 +69,7 @@ export default function AuthProvider({ children }: Props) {
 
     const listener = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-
+      hydrateProfile(session);
       setIsReady(true);
     });
 
