@@ -10,6 +10,7 @@ export type Profile = {
 
 export type AuthContextType = {
   isLoggedIn: boolean;
+  isReady: boolean;
   profile: Profile | null;
   setProfile: (profile: Profile | null) => void;
   signOut: () => Promise<void>;
@@ -26,32 +27,49 @@ type Props = {
 export default function AuthProvider({ children }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<any>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const loadProfile = async (userId: string) => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
 
-      if (data) {
-        setProfile({
-          id: data.id,
-          email: data.email,
-          username: data.username,
-          full_name: data.full_name,
-        });
+        if (data) {
+          setProfile({
+            id: data.id,
+            email: data.email,
+            username: data.username,
+            full_name: data.full_name,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load profile", error);
       }
     };
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        setSession(data.session);
 
-      if (data.session?.user) {
-        loadProfile(data.session.user.id);
-      }
-    });
+        if (data.session?.user) {
+          await loadProfile(data.session.user.id);
+        } else {
+          setProfile(null);
+        }
+
+        setIsReady(true);
+      })
+      .catch((error) => {
+        console.error("Failed to restore session", error);
+        setSession(null);
+        setProfile(null);
+        setIsReady(true);
+      });
 
     const listener = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -61,6 +79,8 @@ export default function AuthProvider({ children }: Props) {
       } else {
         setProfile(null);
       }
+
+      setIsReady(true);
     });
 
     return () => {
@@ -76,6 +96,7 @@ export default function AuthProvider({ children }: Props) {
 
   const value: AuthContextType = {
     isLoggedIn: !!session,
+    isReady,
     profile,
     setProfile,
     signOut,

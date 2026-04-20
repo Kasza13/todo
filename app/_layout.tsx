@@ -12,10 +12,14 @@ import { useAuthContext } from "@/hooks/use-auth-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import AuthProvider from "@/providers/auth-provider";
 
-console.log("AuthProvider:", AuthProvider);
+
 
 function RootNavigator() {
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, isReady } = useAuthContext();
+
+  if (!isReady) {
+    return <> Loading... </>;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

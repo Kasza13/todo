@@ -3,7 +3,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 export function SplashScreenController() {
-  const { profile } = useAuthContext();
+  const { isReady } = useAuthContext();
 
   useEffect(() => {
     async function prepare() {
@@ -17,12 +17,12 @@ export function SplashScreenController() {
   }, []);
 
   useEffect(() => {
-    if (profile !== undefined) {
+    if (isReady) {
       SplashScreen.hideAsync().catch((e) => {
         console.warn("SplashScreen hideAsync failed", e);
       });
     }
-  }, [profile]);
+  }, [isReady]);
 
   return null;
 }
