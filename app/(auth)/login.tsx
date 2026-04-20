@@ -33,11 +33,9 @@ export default function LoginScreen() {
         password,
       });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
 
-      router.push("/");
+      router.replace("/");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong";
@@ -52,41 +50,51 @@ export default function LoginScreen() {
     <>
       <Stack.Screen options={{ title: "Login" }} />
 
-      <ThemedView className="flex-1 justify-center px-6 bg-gray-50">
-        <View className="bg-white p-6 rounded-3xl shadow-md">
-          <Text className="text-center mb-2 text-2xl text-black font-bold">
-            Welcome
+      <ThemedView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center px-5">
+        {/* TITLE */}
+        <View className="mb-8">
+          <Text className="text-4xl font-bold text-gray-900 dark:text-white text-center">
+            The TODO
           </Text>
-
-          <Text className="text-center mb-5 text-black">
-            Sign in or sign up to continue
+          <Text className="text-center text-gray-500 mt-2">
+            Sign in to continue
           </Text>
+        </View>
 
-          <Text className="mb-1 text-black font-medium">Email</Text>
+        {/* CARD */}
+        <View className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm">
+          {/* EMAIL */}
+          <Text className="mb-1 text-gray-900 dark:text-white font-medium">
+            Email
+          </Text>
           <TextInput
             placeholder="your@email.com"
-            className="border border-gray-300 rounded-xl p-3 mb-4"
+            placeholderTextColor="#9ca3af"
+            className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-4 text-gray-900 dark:text-white"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          <Text className="mb-1 text-black font-medium">Password</Text>
+          {/* PASSWORD */}
+          <Text className="mb-1 text-gray-900 dark:text-white font-medium">
+            Password
+          </Text>
 
-          {/* password input */}
           <View className="mb-5 relative">
             <TextInput
               placeholder="••••••••"
+              placeholderTextColor="#9ca3af"
               secureTextEntry={!showPassword}
-              className="border border-gray-300 rounded-xl p-3 pr-10"
+              className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 pr-10 text-gray-900 dark:text-white"
               value={password}
               onChangeText={setPassword}
             />
 
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              className="absolute right-3 top-3"
             >
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
@@ -95,40 +103,43 @@ export default function LoginScreen() {
               />
             </Pressable>
           </View>
-          <Pressable>
-            <Text className="text-blue-500 text-left font-semibold text-base">
-              Forgot password ?
+
+          {/* FORGOT PASSWORD */}
+          <Pressable onPress={() => router.push("/(auth)/newpasswd")}>
+            <Text className="text-blue-500 font-semibold">
+              Forgot password?
             </Text>
           </Pressable>
 
-          <View className="h-3" />
+          <View className="h-5" />
 
+          {/* LOGIN BUTTON */}
           <Pressable
             onPress={handleLogin}
             disabled={loading}
-            className={`rounded-xl p-4 mt-2 ${
+            className={`rounded-xl p-4 ${
               loading ? "bg-blue-300" : "bg-blue-500"
             }`}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-white text-center font-semibold text-base">
+              <Text className="text-white text-center font-semibold">
                 Login
               </Text>
             )}
           </Pressable>
 
-          <View className="h-5" />
+          {/* SIGN UP */}
+          <View className="mt-6 flex-row justify-center">
+            <Text className="text-gray-600 dark:text-gray-300">
+              Don't have an account?{" "}
+            </Text>
 
-          <Text className="text-black text-left font-semibold text-base">
-            Don't have an account ?{" "}
             <Pressable onPress={() => router.push("/(auth)/register")}>
-              <Text className="text-blue-500 text-left font-semibold text-base">
-                Sign up!
-              </Text>
+              <Text className="text-blue-500 font-semibold">Sign up</Text>
             </Pressable>
-          </Text>
+          </View>
         </View>
       </ThemedView>
     </>

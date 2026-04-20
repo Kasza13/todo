@@ -1,5 +1,4 @@
 import { ThemedView } from "@/components/themed-view";
-import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,36 +10,33 @@ import {
 } from "react-native";
 import { supabase } from "../../utils/supabase";
 
-export default function RegisterScreen() {
+export default function NewPasswordScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
-  const handleRegister = async () => {
-    if (!email || !password) {
-      alert("Please fill in all fields");
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Please enter your email");
       return;
     }
 
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "your-app-scheme://reset-password",
       });
 
       if (error) throw new Error(error.message);
 
-      alert("Registration successful! Please check your email.");
+      alert("Password reset email sent!");
       router.replace("/(auth)/login");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong";
-      console.error("Register error:", err);
+      console.error("Reset password error:", err);
       alert(message);
     } finally {
       setLoading(false);
@@ -49,7 +45,7 @@ export default function RegisterScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Register" }} />
+      <Stack.Screen options={{ title: "Reset Password" }} />
 
       <ThemedView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center px-5">
         {/* HEADER */}
@@ -57,8 +53,9 @@ export default function RegisterScreen() {
           <Text className="text-4xl font-bold text-gray-900 dark:text-white text-center">
             The TODO
           </Text>
+          <Text className="text-center text-gray-500 mt-2">Reset password</Text>
           <Text className="text-center text-gray-500 mt-2">
-            Sign up to get started
+            Enter your email to receive a reset link
           </Text>
         </View>
 
@@ -68,46 +65,20 @@ export default function RegisterScreen() {
           <Text className="mb-1 text-gray-900 dark:text-white font-medium">
             Email
           </Text>
+
           <TextInput
             placeholder="your@email.com"
             placeholderTextColor="#9ca3af"
-            className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-4 text-gray-900 dark:text-white"
+            className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-5 text-gray-900 dark:text-white"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          {/* PASSWORD */}
-          <Text className="mb-1 text-gray-900 dark:text-white font-medium">
-            Password
-          </Text>
-
-          <View className="mb-5 relative">
-            <TextInput
-              placeholder="••••••••"
-              placeholderTextColor="#9ca3af"
-              secureTextEntry={!showPassword}
-              className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 pr-10 text-gray-900 dark:text-white"
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <Pressable
-              onPress={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3"
-            >
-              <Ionicons
-                name={showPassword ? "eye-off" : "eye"}
-                size={20}
-                color="gray"
-              />
-            </Pressable>
-          </View>
-
-          {/* REGISTER BUTTON */}
+          {/* SEND BUTTON */}
           <Pressable
-            onPress={handleRegister}
+            onPress={handleResetPassword}
             disabled={loading}
             className={`rounded-xl p-4 ${
               loading ? "bg-blue-300" : "bg-blue-500"
@@ -117,19 +88,15 @@ export default function RegisterScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text className="text-white text-center font-semibold">
-                Register
+                Send reset link
               </Text>
             )}
           </Pressable>
 
-          {/* LOGIN LINK */}
+          {/* BACK TO LOGIN */}
           <View className="mt-6 flex-row justify-center">
-            <Text className="text-gray-600 dark:text-gray-300">
-              Already have an account?{" "}
-            </Text>
-
             <Pressable onPress={() => router.push("/(auth)/login")}>
-              <Text className="text-blue-500 font-semibold">Sign in</Text>
+              <Text className="text-blue-500 font-semibold">Back to login</Text>
             </Pressable>
           </View>
         </View>
